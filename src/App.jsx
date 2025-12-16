@@ -1,51 +1,33 @@
-import { useMemo, useState } from 'react'
+import { useEffect, useMemo, useState } from 'react'
+import { fetchTeams, removeTeam, saveTeam } from './services/teamApi'
 
 const sportOptions = {
   futebol: {
     label: 'Futebol',
     helper: 'Clubes que vão marcar presença no estádio da Copa João Guilherme.',
-    estadioPlaceholder: 'Estádio ou arena',
-    ligaPlaceholder: 'Campeonato (Série A, Copa etc.)',
   },
   volei: {
     label: 'Vôlei',
     helper: 'Equipes de quadra ou praia prontas para animar o ginásio.',
-    estadioPlaceholder: 'Ginásio ou centro de treinamento',
-    ligaPlaceholder: 'Superliga, estadual ou torneio',
+    categorias: ['Masculino', 'Feminino', 'Misto'],
   },
 }
 
 const initialForm = {
   modalidade: 'futebol',
   nome: '',
-  cidade: '',
-  estado: '',
-  liga: '',
-  estadio: '',
-  fundacao: '',
-  tecnico: '',
-  cores: '',
-  titulos: '',
-  contato: '',
-  site: '',
-  observacoes: '',
+  nomeEquipe: '',
+  cpf: '',
+  celular: '',
+  categoriaVolei: 'Masculino',
 }
 
 const requiredFields = {
-  nome: 'Nome do time',
-  cidade: 'Cidade',
-  estado: 'Estado',
-  liga: 'Liga ou campeonato',
-  estadio: 'Estádio ou ginásio',
+  nome: 'Nome',
+  nomeEquipe: 'Nome da equipe',
+  cpf: 'CPF',
+  celular: 'Número de celular',
 }
-
-const sanitizeTitulos = (value) => {
-  const parsed = Number.parseInt(value, 10)
-  if (Number.isNaN(parsed) || parsed < 0) return '0'
-  return String(parsed)
-}
-
-const normalizeEstado = (value) => value.trim().slice(0, 2).toUpperCase()
 
 const formatCreatedAt = (dateString) =>
   new Date(dateString).toLocaleDateString('pt-BR', {
@@ -55,51 +37,55 @@ const formatCreatedAt = (dateString) =>
     minute: '2-digit',
   })
 
-const sendToBackend = async (payload) => {
-  // Espaço reservado para registrar no sistema oficial da Copa João Guilherme.
-  return payload
-}
-
 function App() {
   const [formData, setFormData] = useState(initialForm)
   const [times, setTimes] = useState([])
+  const [carregando, setCarregando] = useState(true)
+  const [erroServidor, setErroServidor] = useState('')
   const [errors, setErrors] = useState([])
 
+  useEffect(() => {
+    const carregarTimes = async () => {
+      try {
+        const existentes = await fetchTeams()
+        setTimes(existentes)
+      } catch (error) {
+        console.error('Erro ao buscar times', error)
+        setErroServidor('Não foi possível carregar os times salvos. Tente novamente mais tarde.')
+      } finally {
+        setCarregando(false)
+      }
+    }
+
+    carregarTimes()
+  }, [])
+
   const estatisticas = useMemo(() => {
-    const totalTitulos = times.reduce((total, time) => {
-      const qtdTitulos = Number.parseInt(time.titulos, 10)
-      return Number.isNaN(qtdTitulos) ? total : total + qtdTitulos
-    }, 0)
+    const modalidades = new Set(times.map((time) => time.modalidade)).size
+    const categoriasVolei = new Set(times.filter((time) => time.modalidade === 'volei').map((time) => time.categoriaVolei)).size
 
     return {
       total: times.length,
-      estados: new Set(times.map((time) => time.estado.trim().toUpperCase())).size,
-      ligas: new Set(times.map((time) => time.liga.trim().toUpperCase())).size,
-      titulos: totalTitulos,
+      modalidades,
+      categoriasVolei,
+      contatos: times.filter((time) => time.celular.trim()).length,
     }
   }, [times])
 
   const handleChange = (event) => {
     const { name, value } = event.target
 
-    if (name === 'estado') {
-      setFormData((current) => ({ ...current, estado: normalizeEstado(value) }))
-      return
-    }
-
-    if (name === 'titulos') {
-      setFormData((current) => ({ ...current, titulos: sanitizeTitulos(value) }))
-      return
-    }
-
     setFormData((current) => ({ ...current, [name]: value }))
   }
 
   const handleSubmit = async (event) => {
     event.preventDefault()
-    const missing = Object.entries(requiredFields)
-      .filter(([field]) => !formData[field].trim())
-      .map(([, label]) => label)
+    const missing = [
+      ...Object.entries(requiredFields)
+        .filter(([field]) => !formData[field].trim())
+        .map(([, label]) => label),
+      ...(formData.modalidade === 'volei' && !formData.categoriaVolei.trim() ? ['Categoria do vôlei'] : []),
+    ]
 
     if (missing.length) {
       setErrors(missing)
@@ -108,20 +94,32 @@ function App() {
 
     const novoTime = {
       ...formData,
-      estado: normalizeEstado(formData.estado),
-      titulos: sanitizeTitulos(formData.titulos),
       id: crypto.randomUUID(),
       criadoEm: new Date().toISOString(),
     }
 
-    await sendToBackend(novoTime)
+    try {
+      await saveTeam(novoTime)
+    } catch (error) {
+      console.error('Erro ao salvar time', error)
+      setErroServidor('Não foi possível salvar no momento. Tente novamente em instantes.')
+      return
+    }
 
     setTimes((current) => [novoTime, ...current])
     setFormData(initialForm)
     setErrors([])
   }
 
-  const modalidadeAtual = sportOptions[formData.modalidade]
+  const handleDelete = async (timeId) => {
+    try {
+      await removeTeam(timeId)
+      setTimes((current) => current.filter((time) => time.id !== timeId))
+    } catch (error) {
+      console.error('Erro ao remover time', error)
+      setErroServidor('Não foi possível remover este time. Tente de novo.')
+    }
+  }
 
   return (
     <div className="min-h-screen bg-linear-to-b from-amber-900 via-slate-950 to-slate-950 text-slate-50">
@@ -131,24 +129,31 @@ function App() {
             <p className="text-xs uppercase tracking-[0.25em] text-amber-200">Copa João Guilherme</p>
             <h1 className="text-3xl font-bold sm:text-4xl">Bem-vindos ao cadastro oficial da Copa</h1>
             <p className="text-sm text-slate-200">
-              Deixe tudo pronto para receber as torcidas: escolha a modalidade, conte um pouco da equipe e salve. Tudo foi pensado
-              para quem chega se sentir acolhido.
+              Deixe tudo pronto para receber as torcidas: escolha a modalidade, confirme os dados básicos e salve. Tudo foi
+              pensado para quem chega se sentir acolhido.
             </p>
             <p className="text-sm text-amber-100">
-              O formulário tem linguagem acolhedora e visual quente para que cada clube se sinta convidado desde o primeiro clique.
+              O formulário pede somente o essencial (nome, equipe, CPF e celular) para que cada clube se sinta convidado desde o
+              primeiro clique.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <StatCard label="Times na Copa" value={estatisticas.total} />
-            <StatCard label="Ligas/competições" value={estatisticas.ligas} />
-            <StatCard label="Estados presentes" value={estatisticas.estados} />
-            <StatCard label="Títulos somados" value={estatisticas.titulos} />
+            <StatCard label="Modalidades" value={estatisticas.modalidades} />
+            <StatCard label="Categorias de vôlei" value={estatisticas.categoriasVolei} />
+            <StatCard label="Contatos enviados" value={estatisticas.contatos} />
           </div>
           <div className="flex flex-wrap gap-3 text-xs text-amber-100">
             <span className="rounded-full bg-amber-500/15 px-3 py-1">Ambiente acolhedor para atletas e torcedores</span>
             <span className="rounded-full bg-amber-400/15 px-3 py-1 text-amber-50">Comunicação humana e transparente</span>
           </div>
         </header>
+
+        {erroServidor && (
+          <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+            {erroServidor}
+          </div>
+        )}
 
         <section className="grid grid-cols-1 gap-6 lg:grid-cols-3">
           <div className="space-y-4 lg:col-span-2">
@@ -157,9 +162,7 @@ function App() {
                 <div>
                   <p className="text-xs uppercase tracking-[0.25em] text-amber-200">Modalidade</p>
                   <h2 className="text-lg font-semibold text-slate-50">Escolha antes de cadastrar</h2>
-                  <p className="text-sm text-slate-300">
-                    Campos e exemplos mudam para futebol ou vôlei, mantendo o tom acolhedor do evento.
-                  </p>
+                  <p className="text-sm text-slate-300">Selecione o esporte antes de preencher os dados obrigatórios.</p>
                 </div>
               </div>
               <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
@@ -192,110 +195,59 @@ function App() {
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <InputField
                   id="nome"
-                  label="Nome do time*"
+                  label="Nome*"
                   value={formData.nome}
+                  onChange={handleChange}
+                  placeholder="Seu nome completo"
+                />
+                <InputField
+                  id="nomeEquipe"
+                  label="Nome da equipe*"
+                  value={formData.nomeEquipe}
                   onChange={handleChange}
                   placeholder="Esporte Clube Horizonte"
                 />
+              </div>
+
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <InputField
-                  id="cidade"
-                  label="Cidade*"
-                  value={formData.cidade}
+                  id="cpf"
+                  label="CPF*"
+                  value={formData.cpf}
                   onChange={handleChange}
-                  placeholder="Fortaleza"
+                  placeholder="000.000.000-00"
+                  maxLength={14}
+                />
+                <InputField
+                  id="celular"
+                  label="Número de celular*"
+                  value={formData.celular}
+                  onChange={handleChange}
+                  placeholder="(00) 90000-0000"
+                  maxLength={16}
                 />
               </div>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <InputField
-                  id="estado"
-                  label="Estado*"
-                  value={formData.estado}
-                  onChange={handleChange}
-                  placeholder="CE"
-                  maxLength={2}
-                  className="uppercase"
-                />
-                <InputField
-                  id="liga"
-                  label="Liga/Campeonato*"
-                  value={formData.liga}
-                  onChange={handleChange}
-                  placeholder={modalidadeAtual.ligaPlaceholder}
-                />
-                <InputField
-                  id="estadio"
-                  label={formData.modalidade === 'volei' ? 'Ginásio*' : 'Estádio*'}
-                  value={formData.estadio}
-                  onChange={handleChange}
-                  placeholder={modalidadeAtual.estadioPlaceholder}
-                />
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <InputField
-                  id="fundacao"
-                  label="Fundação"
-                  type="number"
-                  value={formData.fundacao}
-                  onChange={handleChange}
-                  placeholder="1985"
-                />
-                <InputField
-                  id="tecnico"
-                  label="Técnico"
-                  value={formData.tecnico}
-                  onChange={handleChange}
-                  placeholder="Nome do treinador"
-                />
-                <InputField
-                  id="cores"
-                  label="Cores oficiais"
-                  value={formData.cores}
-                  onChange={handleChange}
-                  placeholder="Azul e branco"
-                />
-              </div>
-
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-3">
-                <InputField
-                  id="titulos"
-                  label="Títulos conquistados"
-                  type="number"
-                  value={formData.titulos}
-                  onChange={handleChange}
-                  placeholder="0"
-                  min={0}
-                />
-                <InputField
-                  id="contato"
-                  label="Contato principal"
-                  value={formData.contato}
-                  onChange={handleChange}
-                  placeholder="contato@time.com"
-                />
-                <InputField
-                  id="site"
-                  label="Site oficial"
-                  value={formData.site}
-                  onChange={handleChange}
-                  placeholder="https://time.com"
-                />
-              </div>
-
-              <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold text-slate-200" htmlFor="observacoes">
-                  Observações
-                </label>
-                <textarea
-                  id="observacoes"
-                  name="observacoes"
-                  value={formData.observacoes}
-                  onChange={handleChange}
-                  className=".min-h-[90px] w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-500/40"
-                  placeholder="Histórico, destaques ou pendências."
-                />
-              </div>
+              {formData.modalidade === 'volei' && (
+                <div className="flex flex-col gap-2">
+                  <label className="text-sm font-semibold text-slate-200" htmlFor="categoriaVolei">
+                    Categoria do vôlei*
+                  </label>
+                  <select
+                    id="categoriaVolei"
+                    name="categoriaVolei"
+                    value={formData.categoriaVolei}
+                    onChange={handleChange}
+                    className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-500/40"
+                  >
+                    {sportOptions.volei.categorias.map((categoria) => (
+                      <option key={categoria} value={categoria}>
+                        {categoria}
+                      </option>
+                    ))}
+                  </select>
+                </div>
+              )}
 
               {errors.length > 0 && (
                 <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
@@ -334,9 +286,9 @@ function App() {
             </div>
             <div className="grid grid-cols-2 gap-3 text-sm text-slate-100">
               <SmallStat label="Times" value={estatisticas.total} />
-              <SmallStat label="Ligas" value={estatisticas.ligas} />
-              <SmallStat label="Estados" value={estatisticas.estados} />
-              <SmallStat label="Títulos" value={estatisticas.titulos} />
+              <SmallStat label="Modalidades" value={estatisticas.modalidades} />
+              <SmallStat label="Vôlei" value={estatisticas.categoriasVolei} />
+              <SmallStat label="Contatos" value={estatisticas.contatos} />
             </div>
             <p className="rounded-lg bg-amber-500/10 px-3 py-2 text-xs text-amber-100">
               Cada novo time é recebido com cuidado e celebração.
@@ -349,7 +301,7 @@ function App() {
             <div>
               <p className="text-sm uppercase tracking-[0.2em] text-amber-200">Times confirmados</p>
               <h2 className="text-2xl font-semibold">Convidados da Copa</h2>
-              <p className="text-sm text-slate-300">Cards acolhedores destacam modalidade, contato e títulos.</p>
+              <p className="text-sm text-slate-300">Cards acolhedores destacam modalidade, contato e documentação.</p>
             </div>
           </div>
 
@@ -370,47 +322,18 @@ function App() {
                         <span className="rounded-full bg-amber-500/15 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-amber-50">
                           {time.modalidade}
                         </span>
-                        <p className="text-xs uppercase tracking-[0.18em] text-amber-200">{time.liga}</p>
+                        {time.modalidade === 'volei' && (
+                          <p className="text-xs uppercase tracking-[0.18em] text-amber-200">{time.categoriaVolei}</p>
+                        )}
                       </div>
-                      <h3 className="text-lg font-semibold leading-tight text-slate-50">{time.nome}</h3>
-                      <p className="text-sm text-slate-300">
-                        {time.cidade} • {time.estado.toUpperCase()} • {time.estadio}
-                      </p>
+                      <h3 className="text-lg font-semibold leading-tight text-slate-50">{time.nomeEquipe}</h3>
+                      <p className="text-sm text-slate-300">Responsável: {time.nome}</p>
                     </div>
-                    <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-200">
-                      {sanitizeTitulos(time.titulos)} títulos
-                    </span>
+                    <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-200">CPF {time.cpf}</span>
                   </div>
 
-                  {(time.tecnico || time.cores || time.site) && (
-                    <dl className="space-y-1 text-sm text-slate-200">
-                      {time.tecnico && (
-                        <div className="flex items-center gap-1">
-                          <dt className="text-slate-400">Técnico:</dt>
-                          <dd className="font-medium text-slate-100">{time.tecnico}</dd>
-                        </div>
-                      )}
-                      {time.cores && (
-                        <div className="flex items-center gap-1">
-                          <dt className="text-slate-400">Cores:</dt>
-                          <dd className="font-medium text-slate-100">{time.cores}</dd>
-                        </div>
-                      )}
-                      {time.site && (
-                        <div className="flex items-center gap-1">
-                          <dt className="text-slate-400">Site:</dt>
-                          <dd className="font-medium text-amber-200">{time.site}</dd>
-                        </div>
-                      )}
-                    </dl>
-                  )}
-
-                  {time.observacoes && (
-                    <p className="rounded-lg bg-slate-800/80 px-3 py-2 text-sm text-slate-200">{time.observacoes}</p>
-                  )}
-
                   <div className="flex items-center justify-between text-xs text-slate-400">
-                    <span>Contato: {time.contato || 'não informado'}</span>
+                    <span>Celular: {time.celular || 'não informado'}</span>
                     <time dateTime={time.criadoEm}>{formatCreatedAt(time.criadoEm)}</time>
                   </div>
                 </article>
@@ -418,6 +341,8 @@ function App() {
             </div>
           )}
         </section>
+
+        <AdminPanel carregando={carregando} erroServidor={erroServidor} times={times} onDelete={handleDelete} />
       </div>
     </div>
   )
@@ -458,6 +383,80 @@ function InputField({ id, label, value, onChange, placeholder, type = 'text', cl
         {...rest}
       />
     </div>
+  )
+}
+
+function AdminPanel({ carregando, erroServidor, times, onDelete }) {
+  return (
+    <section className="space-y-4 rounded-2xl bg-slate-900/70 p-6 shadow-lg shadow-black/30 ring-1 ring-white/5">
+      <div className="flex flex-col gap-2 sm:flex-row sm:items-end sm:justify-between">
+        <div>
+          <p className="text-xs uppercase tracking-[0.25em] text-amber-200">Painel administrativo</p>
+          <h2 className="text-xl font-semibold text-slate-50">Controle de times salvos</h2>
+          <p className="text-sm text-slate-300">
+            Consulte, valide e apague cadastros diretamente do site sem precisar acessar o servidor.
+          </p>
+        </div>
+        <span className="rounded-full bg-amber-500/15 px-3 py-1 text-xs font-semibold text-amber-100">
+          {times.length} times armazenados
+        </span>
+      </div>
+
+      {erroServidor && (
+        <div className="rounded-lg border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+          {erroServidor}
+        </div>
+      )}
+
+      {carregando ? (
+        <div className="rounded-xl border border-dashed border-slate-700 px-4 py-6 text-center text-sm text-slate-300">
+          Buscando cadastros salvos...
+        </div>
+      ) : times.length === 0 ? (
+        <div className="rounded-xl border border-dashed border-amber-600/50 bg-slate-900/70 px-4 py-6 text-center text-sm text-slate-300">
+          Nenhum cadastro salvo por enquanto.
+        </div>
+      ) : (
+        <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-950/40 shadow-inner shadow-black/30">
+          <table className="w-full text-sm text-slate-200">
+            <thead className="bg-slate-900/80 text-xs uppercase tracking-wide text-slate-400">
+              <tr>
+                <th className="px-4 py-3 text-left">Equipe</th>
+                <th className="px-4 py-3 text-left">Modalidade</th>
+                <th className="px-4 py-3 text-left">Contato</th>
+                <th className="px-4 py-3 text-left">Criado em</th>
+                <th className="px-4 py-3 text-left">Ações</th>
+              </tr>
+            </thead>
+            <tbody>
+              {times.map((time) => (
+                <tr key={time.id} className="border-t border-slate-800/80">
+                  <td className="px-4 py-3">
+                    <div className="font-semibold text-slate-50">{time.nomeEquipe}</div>
+                    <div className="text-xs text-slate-400">CPF {time.cpf}</div>
+                  </td>
+                  <td className="px-4 py-3 capitalize">
+                    {time.modalidade}
+                    {time.modalidade === 'volei' && ` • ${time.categoriaVolei}`}
+                  </td>
+                  <td className="px-4 py-3 text-xs text-slate-300">{time.celular}</td>
+                  <td className="px-4 py-3 text-xs text-slate-300">{formatCreatedAt(time.criadoEm)}</td>
+                  <td className="px-4 py-3">
+                    <button
+                      type="button"
+                      onClick={() => onDelete(time.id)}
+                      className="rounded-lg border border-red-500/40 px-3 py-2 text-xs font-semibold text-red-100 transition hover:bg-red-500/10 focus:outline-none focus:ring-2 focus:ring-red-500/40"
+                    >
+                      Excluir definitivamente
+                    </button>
+                  </td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </section>
   )
 }
 
