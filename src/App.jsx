@@ -19,7 +19,8 @@ const initialForm = {
   nomeEquipe: '',
   cpf: '',
   celular: '',
-  categoriaVolei: 'Masculino',
+  integrantes: '',
+  categoriaVolei: '',
 }
 
 const requiredFields = {
@@ -27,6 +28,7 @@ const requiredFields = {
   nomeEquipe: 'Nome da equipe',
   cpf: 'CPF',
   celular: 'Número de celular',
+  integrantes: 'Nome dos integrantes',
 }
 
 const formatCreatedAt = (dateString) =>
@@ -36,6 +38,8 @@ const formatCreatedAt = (dateString) =>
     hour: '2-digit',
     minute: '2-digit',
   })
+
+const normalizeText = (value) => value.trim()
 
 function App() {
   const [formData, setFormData] = useState(initialForm)
@@ -94,6 +98,12 @@ function App() {
 
     const novoTime = {
       ...formData,
+      nome: normalizeText(formData.nome),
+      nomeEquipe: normalizeText(formData.nomeEquipe),
+      cpf: normalizeText(formData.cpf),
+      celular: normalizeText(formData.celular),
+      integrantes: normalizeText(formData.integrantes),
+      categoriaVolei: normalizeText(formData.categoriaVolei),
       id: crypto.randomUUID(),
       criadoEm: new Date().toISOString(),
     }
@@ -133,8 +143,8 @@ function App() {
               pensado para quem chega se sentir acolhido.
             </p>
             <p className="text-sm text-amber-100">
-              O formulário pede somente o essencial (nome, equipe, CPF e celular) para que cada clube se sinta convidado desde o
-              primeiro clique.
+              O formulário pede somente o essencial (nome, equipe, integrantes, CPF e celular) para que cada clube se sinta
+              convidado desde o primeiro clique.
             </p>
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
@@ -172,7 +182,13 @@ function App() {
                     <button
                       key={key}
                       type="button"
-                      onClick={() => setFormData((current) => ({ ...current, modalidade: key }))}
+                      onClick={() =>
+                        setFormData((current) => ({
+                          ...current,
+                          modalidade: key,
+                          categoriaVolei: key === 'volei' ? current.categoriaVolei : '',
+                        }))
+                      }
                       className={`rounded-xl border px-4 py-3 text-left transition focus:outline-none focus:ring-2 focus:ring-amber-400/70 ${
                         isActive
                           ? 'border-amber-400/70 bg-amber-500/10 text-amber-50 shadow-amber-500/20'
@@ -228,6 +244,21 @@ function App() {
                 />
               </div>
 
+              <div className="flex flex-col gap-2">
+                <label className="text-sm font-semibold text-slate-200" htmlFor="integrantes">
+                  Nome dos integrantes*
+                </label>
+                <textarea
+                  id="integrantes"
+                  name="integrantes"
+                  value={formData.integrantes}
+                  onChange={handleChange}
+                  className="min-h-[72px] w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-500/40"
+                  placeholder="João, Gabriel, Pedro, Augusto..."
+                />
+                <p className="text-xs text-slate-400">Liste todos os membros que vão participar junto com você.</p>
+              </div>
+
               {formData.modalidade === 'volei' && (
                 <div className="flex flex-col gap-2">
                   <label className="text-sm font-semibold text-slate-200" htmlFor="categoriaVolei">
@@ -240,6 +271,9 @@ function App() {
                     onChange={handleChange}
                     className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-500/40"
                   >
+                    <option value="" disabled>
+                      Selecione a categoria
+                    </option>
                     {sportOptions.volei.categorias.map((categoria) => (
                       <option key={categoria} value={categoria}>
                         {categoria}
@@ -328,6 +362,7 @@ function App() {
                       </div>
                       <h3 className="text-lg font-semibold leading-tight text-slate-50">{time.nomeEquipe}</h3>
                       <p className="text-sm text-slate-300">Responsável: {time.nome}</p>
+                      <p className="text-sm text-slate-200">Integrantes: {time.integrantes}</p>
                     </div>
                     <span className="rounded-full bg-emerald-500/15 px-3 py-1 text-xs font-semibold text-emerald-200">CPF {time.cpf}</span>
                   </div>
@@ -423,6 +458,7 @@ function AdminPanel({ carregando, erroServidor, times, onDelete }) {
               <tr>
                 <th className="px-4 py-3 text-left">Equipe</th>
                 <th className="px-4 py-3 text-left">Modalidade</th>
+                <th className="px-4 py-3 text-left">Integrantes</th>
                 <th className="px-4 py-3 text-left">Contato</th>
                 <th className="px-4 py-3 text-left">Criado em</th>
                 <th className="px-4 py-3 text-left">Ações</th>
@@ -439,6 +475,7 @@ function AdminPanel({ carregando, erroServidor, times, onDelete }) {
                     {time.modalidade}
                     {time.modalidade === 'volei' && ` • ${time.categoriaVolei}`}
                   </td>
+                  <td className="px-4 py-3 text-xs text-slate-300">{time.integrantes}</td>
                   <td className="px-4 py-3 text-xs text-slate-300">{time.celular}</td>
                   <td className="px-4 py-3 text-xs text-slate-300">{formatCreatedAt(time.criadoEm)}</td>
                   <td className="px-4 py-3">
