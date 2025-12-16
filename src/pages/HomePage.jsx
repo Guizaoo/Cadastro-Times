@@ -240,13 +240,7 @@ export function HomePage({
               <h2 className="text-2xl font-semibold">Convidados da Copa</h2>
               <p className="text-sm text-slate-300">Cards acolhedores destacam modalidade, contato e documentação.</p>
             </div>
-            <button
-              type="button"
-              onClick={onNavigateAdmin}
-              className="rounded-lg border border-amber-400/60 px-4 py-2 text-xs font-semibold text-amber-100 transition hover:border-amber-300 hover:text-amber-50"
-            >
-              Abrir painel administrativo
-            </button>
+            
           </div>
 
           {times.length === 0 ? (

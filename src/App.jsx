@@ -4,8 +4,7 @@ import { HomePage, initialForm } from './pages/HomePage'
 import { LAST_PAYMENT_KEY, PaymentPage } from './pages/PaymentPage'
 import { fetchTeams, removeTeam, saveTeam, updateTeamStatus } from './services/teamApi'
 
-// Orquestra o fluxo entre a página pública e a área administrativa,
-// centralizando validação, persistência e roteamento baseado em history API.
+
 
 const requiredFields = {
   nome: 'Nome',
@@ -75,6 +74,10 @@ const validateCelular = (value) => {
 
 const parseIntegrantes = (value) => value.split(/[\n,]/).map((item) => item.trim()).filter(Boolean)
 
+// Garante que um mesmo CPF só possa cadastrar um time por modalidade.
+const cpfExistsInModalidade = (list, cpfDigits, modalidade) =>
+  Boolean(cpfDigits) && list.some((time) => sanitizeDigits(time.cpf) === cpfDigits && time.modalidade === modalidade)
+
 function App() {
   const [route, setRoute] = useState(window.location.pathname)
   const [formData, setFormData] = useState(initialForm)
@@ -132,6 +135,7 @@ function App() {
   const handleSubmit = async (event) => {
     event.preventDefault()
     const integrantesList = parseIntegrantes(formData.integrantes)
+    const cpfDigits = sanitizeDigits(formData.cpf)
 
     const missing = [
       ...Object.entries(requiredFields)
@@ -144,6 +148,12 @@ function App() {
       ...(missing.length ? missing : []),
       ...(!validateCPF(formData.cpf) ? ['CPF inválido'] : []),
       ...(!validateCelular(formData.celular) ? ['Número de celular inválido (use DDD e 9 dígitos)'] : []),
+      // Impede o mesmo CPF de cadastrar mais de um time na mesma modalidade
+      ...(
+        cpfExistsInModalidade(times, cpfDigits, formData.modalidade)
+          ? [`Este CPF já possui um time de ${formData.modalidade === 'futebol' ? 'futebol' : 'vôlei'} cadastrado.`]
+          : []
+      ),
       ...(formData.modalidade === 'futebol' && integrantesList.length > 15
         ? ['Limite de 15 integrantes para futebol']
         : []),
