@@ -210,13 +210,6 @@ export function HomePage({
                 >
                   Limpar tudo
                 </button>
-                <button
-                  type="button"
-                  onClick={onNavigateAdmin}
-                  className="inline-flex items-center gap-2 rounded-lg border border-amber-400/60 px-5 py-2 text-sm font-semibold text-amber-100 transition hover:border-amber-300 hover:text-amber-50"
-                >
-                  Ir para a área admin
-                </button>
                 <p className="text-xs text-slate-400">Campos marcados com * são obrigatórios.</p>
               </div>
             </form>
