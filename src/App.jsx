@@ -74,7 +74,7 @@ const validateCelular = (value) => {
 
 const parseIntegrantes = (value) => value.split(/[\n,]/).map((item) => item.trim()).filter(Boolean)
 
-// Garante que um mesmo CPF só possa cadastrar um time por modalidade.
+// limitando cpf
 const cpfExistsInModalidade = (list, cpfDigits, modalidade) =>
   Boolean(cpfDigits) && list.some((time) => sanitizeDigits(time.cpf) === cpfDigits && time.modalidade === modalidade)
 
