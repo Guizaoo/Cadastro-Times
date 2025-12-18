@@ -1,18 +1,7 @@
 import React from 'react'
 import { InputField, NavigationBar, SmallStat, StatCard, StatusBadge } from '../components/ui'
 
-
-const sportOptions = {
-  futebol: {
-    label: 'Futebol',
-    helper: 'Clubes que vão marcar presença no estádio da Copa João Guilherme.',
-  },
-  volei: {
-    label: 'Vôlei',
-    helper: 'Equipes de quadra ou praia prontas para animar o ginásio.',
-    categorias: ['Masculino', 'Feminino', 'Misto'],
-  },
-}
+import { sportOptions } from './homePageConfig'
 
 const formatCreatedAt = (dateString) =>
   new Date(dateString).toLocaleDateString('pt-BR', {
@@ -254,7 +243,7 @@ export function HomePage({
                   key={time.id}
                   className="relative flex flex-col gap-3 rounded-xl border border-slate-800 bg-slate-900/80 p-4 shadow-inner shadow-black/30"
                 >
-                  <div className="flex items-start justify_between gap-2">
+                  <div className="flex items-start justify-between gap-2">
                     <div className="space-y-1">
                       <div className="flex flex-wrap items-center gap-2">
                         <span className="rounded-full bg-amber-500/15 px-2 py-1 text-[11px] font-semibold uppercase tracking-wide text-amber-50">
@@ -286,14 +275,3 @@ export function HomePage({
   )
 }
 
-const initialForm = {
-  modalidade: 'futebol',
-  nome: '',
-  nomeEquipe: '',
-  cpf: '',
-  celular: '',
-  integrantes: '',
-  categoriaVolei: '',
-}
-
-export { initialForm, sportOptions }

@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AdminPage } from './pages/AdminPage'
-import { HomePage, initialForm } from './pages/HomePage'
+import { HomePage } from './pages/HomePage'
+import {initialForm} from './pages/homeConstants'
 import { LAST_PAYMENT_KEY, PaymentPage } from './pages/PaymentPage'
 import { fetchTeams, removeTeam, saveTeam, updateTeamStatus } from './services/teamApi'
 
@@ -228,22 +229,24 @@ function App() {
         times={times}
         onMarkPaid={handleStatusChange}
         onNavigateHome={() => navigate('/')}
+        onNavigateAdmin={() => navigate('/admin')}
       />
     )
   }
 
   if (isAdminRoute) {
-    return (
-      <AdminPage
-        times={times}
-        carregando={carregando}
-        erroServidor={erroServidor}
-        onDelete={handleDelete}
-        onStatusChange={handleStatusChange}
-        onNavigateHome={() => navigate('/')}
-      />
-    )
-  }
+      return (
+        <AdminPage
+          times={times}
+          carregando={carregando}
+          erroServidor={erroServidor}
+          onDelete={handleDelete}
+          onStatusChange={handleStatusChange}
+          onNavigateHome={() => navigate('/')}
+          onNavigateAdmin={() => navigate('/admin')}
+        />
+      )
+    }
 
   return (
     <HomePage

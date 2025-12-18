@@ -33,13 +33,13 @@ export function NavigationBar({ onNavigateAdmin, onNavigateHome }) {
 
 const statusLabels = {
   pendente: 'Pendente',
-  aprovado: 'Aprovado',
+  pago: 'Pago',
   reprovado: 'Reprovado',
 }
 
 const statusStyles = {
   pendente: 'bg-amber-500/10 text-amber-100 border-amber-400/50',
-  aprovado: 'bg-emerald-500/10 text-emerald-100 border-emerald-400/50',
+  pago: 'bg-emerald-500/10 text-emerald-100 border-emerald-400/50',
   reprovado: 'bg-red-500/10 text-red-100 border-red-400/50',
 }
 
