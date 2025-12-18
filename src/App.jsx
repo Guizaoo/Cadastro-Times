@@ -1,7 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AdminPage } from './pages/AdminPage'
 import { HomePage } from './pages/HomePage'
-import {initialForm} from './pages/homeConstants'
+import { initialForm } from './pages/homePageConfig'
 import { LAST_PAYMENT_KEY, PaymentPage } from './pages/PaymentPage'
 import { fetchTeams, removeTeam, saveTeam, updateTeamStatus } from './services/teamApi'
 

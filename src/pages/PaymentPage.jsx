@@ -16,13 +16,6 @@ const formatCurrency = (value) =>
     currency: 'BRL',
   }).format(value)
 
-const formatCreatedAt = (dateString) =>
-  new Date(dateString).toLocaleDateString('pt-BR', {
-    day: '2-digit',
-    month: 'short',
-    hour: '2-digit',
-    minute: '2-digit',
-  })
 
 export function PaymentPage({
   times = [],
@@ -161,7 +154,7 @@ export function PaymentPage({
         <header className="rounded-3xl bg-slate-900/80 p-6 shadow-xl">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-xs tracking-widest text-amber-300 uppercase">
+              <p className="text-xs tracking-widest text-amber-300 uppercase bg">
                 Pagamento PIX
               </p>
               <h1 className="text-2xl font-bold mt-1">
