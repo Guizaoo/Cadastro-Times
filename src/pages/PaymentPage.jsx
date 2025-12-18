@@ -1,10 +1,10 @@
-import React, { useEffect, useMemo, useRef, useState } from 'react'
+import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
 import { NavigationBar, StatusBadge } from '../components/ui'
 
 // ================= CONFIGURAÇÕES =================
 
 // 🔑 Chave PIX (use uma CHAVE ALEATÓRIA do banco)
-const DEFAULT_PIX_KEY = 'COLE_SUA_CHAVE_PIX_ALEATORIA_AQUI'
+const DEFAULT_PIX_KEY = '98988831316'
 
 // 💰 Valor fixo
 const DEFAULT_PIX_AMOUNT = 0.1
@@ -33,7 +33,12 @@ const formatCreatedAt = (dateString) =>
     minute: '2-digit',
   })
 
-export function PaymentPage({ times, onMarkPaid, onNavigateHome, onNavigateAdmin }) {
+export function PaymentPage({
+  times = [],
+  onMarkPaid = async () => {},
+  onNavigateHome,
+  onNavigateAdmin,
+}) {
   const qrRef = useRef(null)
   const keyRef = useRef(null)
 
@@ -44,9 +49,11 @@ export function PaymentPage({ times, onMarkPaid, onNavigateHome, onNavigateAdmin
     return search.get('id') || localStorage.getItem(LAST_PAYMENT_KEY) || ''
   })
 
+  const safeTimes = Array.isArray(times) ? times : []
+
   const team = useMemo(
-    () => times.find((item) => item.id === teamId) || times[0],
-    [teamId, times]
+    () => safeTimes.find((item) => item.id === teamId) || safeTimes[0],
+    [teamId, safeTimes]
   )
 
   useEffect(() => {
@@ -55,10 +62,55 @@ export function PaymentPage({ times, onMarkPaid, onNavigateHome, onNavigateAdmin
     }
   }, [team])
 
+  const whatsappMessage = useMemo(() => {
+    if (!team) return ''
+    return encodeURIComponent(
+      `Olá! Confirmo o pagamento PIX da equipe ${team.nomeEquipe} (modalidade ${team.modalidade}${
+        team.modalidade === 'volei' && team.categoriaVolei
+          ? `, categoria ${team.categoriaVolei}`
+          : ''
+      }) no valor de ${formatCurrency(DEFAULT_PIX_AMOUNT)}. Segue comprovante para validação.`
+    )
+  }, [team])
+
+  const hasOpenedWhatsapp = useRef(false)
+
+  const openWhatsapp = useCallback(() => {
+    if (!team || !whatsappMessage || hasOpenedWhatsapp.current) return
+    window.open(
+      `https://wa.me/${WHATSAPP_NUMBER}?text=${whatsappMessage}`,
+      '_blank'
+    )
+    hasOpenedWhatsapp.current = true
+  }, [team, whatsappMessage])
+
+  useEffect(() => {
+    if (team?.status === 'pago') {
+      setPaymentHint('Abrindo WhatsApp para finalizar a validação...')
+      openWhatsapp()
+    } else {
+      hasOpenedWhatsapp.current = false
+    }
+  }, [team?.status, openWhatsapp])
+
   if (!team) {
     return (
-      <div className="min-h-screen bg-slate-950 text-slate-200 flex items-center justify-center">
-        Nenhum time encontrado.
+      <div className="min-h-screen bg-slate-950 text-slate-200 flex items-center justify-center px-4 text-center">
+        <div className="space-y-3">
+          <div className="text-lg font-semibold">Nenhum time encontrado para pagamento.</div>
+          <p className="text-sm text-slate-400">
+            Abra o link de pagamento a partir do cadastro ou volte para a página inicial para tentar novamente.
+          </p>
+          {onNavigateHome && (
+            <button
+              type="button"
+              onClick={onNavigateHome}
+              className="rounded-lg border border-amber-300/60 px-4 py-2 text-sm font-semibold text-amber-50 hover:border-amber-200"
+            >
+              Voltar para início
+            </button>
+          )}
+        </div>
       </div>
     )
   }
@@ -83,26 +135,15 @@ export function PaymentPage({ times, onMarkPaid, onNavigateHome, onNavigateAdmin
 
   const handlePayViaKey = async () => {
     await copyPixKey()
+    setPaymentHint('Chave copiada. Pague pelo app do banco e clique em “Já paguei”.')
     keyRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 
-  const handleMarkPaid = () => {
-    onMarkPaid(team.id, 'aguardando_validacao')
-
-    const mensagem = encodeURIComponent(
-      `Olá! Confirmo o pagamento PIX da equipe ${team.nomeEquipe} (modalidade ${team.modalidade}${
-        team.modalidade === 'volei' && team.categoriaVolei
-          ? `, categoria ${team.categoriaVolei}`
-          : ''
-      }) no valor de ${formatCurrency(
-        DEFAULT_PIX_AMOUNT
-      )}. Segue comprovante para validação.`
-    )
-
-    window.open(
-      `https://wa.me/${WHATSAPP_NUMBER}?text=${mensagem}`,
-      '_blank'
-    )
+  const handleMarkPaid = async () => {
+    if (!team) return
+    setPaymentHint('Marcando pagamento como pago e abrindo WhatsApp...')
+    await onMarkPaid(team.id, 'pago')
+    openWhatsapp()
   }
 
   // ================= UI =================

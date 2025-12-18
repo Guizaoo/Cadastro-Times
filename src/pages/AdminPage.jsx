@@ -12,9 +12,9 @@ const formatCreatedAt = (dateString) =>
   })
 
 export function AdminPage({ times, carregando, erroServidor, onDelete, onStatusChange, onNavigateHome }) {
-  const { aprovados, reprovados, pendentes } = useMemo(
+  const { pagos, reprovados, pendentes } = useMemo(
     () => ({
-      aprovados: times.filter((time) => time.status === 'aprovado').length,
+      pagos: times.filter((time) => time.status === 'pago').length,
       reprovados: times.filter((time) => time.status === 'reprovado').length,
       pendentes: times.filter((time) => time.status === 'pendente').length,
     }),
@@ -41,7 +41,7 @@ export function AdminPage({ times, carregando, erroServidor, onDelete, onStatusC
           </div>
           <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
             <SmallStat label="Pendentes" value={pendentes} />
-            <SmallStat label="Aprovados" value={aprovados} />
+            <SmallStat label="Pagos" value={pagos} />
             <SmallStat label="Reprovados" value={reprovados} />
             <SmallStat label="Total" value={times.length} />
           </div>
@@ -110,10 +110,10 @@ export function AdminPage({ times, carregando, erroServidor, onDelete, onStatusC
                         <div className="flex flex-wrap gap-2 text-xs">
                           <button
                             type="button"
-                            onClick={() => onStatusChange(time.id, 'aprovado')}
+                            onClick={() => onStatusChange(time.id, 'pago')}
                             className="rounded-lg border border-emerald-500/50 px-3 py-2 font-semibold text-emerald-100 transition hover:bg-emerald-500/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
                           >
-                            Aprovar
+                            Pago
                           </button>
                           <button
                             type="button"

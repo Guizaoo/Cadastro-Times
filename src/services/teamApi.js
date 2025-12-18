@@ -1,5 +1,17 @@
 
 const STORAGE_KEY = 'copa:times'
+const VALID_STATUSES = ['pendente', 'pago', 'reprovado']
+const LEGACY_STATUS_MAP = {
+  pagamento_pendente: 'pendente',
+  aguardando_validacao: 'pendente',
+  aprovado: 'pago',
+}
+
+const normalizeStatus = (status) => {
+  if (VALID_STATUSES.includes(status)) return status
+  if (status in LEGACY_STATUS_MAP) return LEGACY_STATUS_MAP[status]
+  return 'pendente'
+}
 
 const readFromStorage = () => {
   const raw = localStorage.getItem(STORAGE_KEY)
@@ -18,7 +30,7 @@ const persist = (times) => {
   localStorage.setItem(STORAGE_KEY, JSON.stringify(times))
 }
 
-const ensureStatus = (team) => ({ ...team, status: team.status ?? 'pendente' })
+const ensureStatus = (team) => ({ ...team, status: normalizeStatus(team.status) })
 
 export async function fetchTeams() {
   const stored = readFromStorage()

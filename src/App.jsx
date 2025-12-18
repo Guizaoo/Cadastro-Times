@@ -179,7 +179,7 @@ function App() {
       celular: celularFormatado,
       integrantes: integrantesFormatados,
       categoriaVolei: normalizeText(formData.categoriaVolei),
-      status: 'pagamento_pendente',
+      status: 'pendente',
       id: crypto.randomUUID(),
       criadoEm: new Date().toISOString(),
     }
