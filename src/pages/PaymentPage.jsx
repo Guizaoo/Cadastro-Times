@@ -19,7 +19,6 @@ const formatCurrency = (value) =>
 
 export function PaymentPage({
   times = [],
-  onMarkPaid = async () => {},
   onNavigateHome,
   onNavigateAdmin,
 }) {
@@ -28,7 +27,9 @@ export function PaymentPage({
   const hasOpenedWhatsapp = useRef(false)
 
   // 🔹 Estado só para mensagens MANUAIS
-  const [manualHint, setManualHint] = useState('')
+  const [manualHint, setManualHint] = useState(
+    'O pagamento só será confirmado após a validação do PIX pela organização.'
+  )
 
   const [teamId] = useState(() => {
     const search = new URLSearchParams(window.location.search)
@@ -134,10 +135,13 @@ export function PaymentPage({
     keyRef.current?.scrollIntoView({ behavior: 'smooth', block: 'center' })
   }
 
-  const handleMarkPaid = async () => {
+  const handleSendReceipt = () => {
     if (!team) return
-    setManualHint('Marcando pagamento como pago...')
-    await onMarkPaid(team.id, 'pago')
+    setManualHint(
+      'Envie o comprovante via WhatsApp. A confirmação só ocorre após a validação do PIX.'
+    )
+    hasOpenedWhatsapp.current = false
+    openWhatsapp()
   }
 
   // ================= UI =================
@@ -172,17 +176,28 @@ export function PaymentPage({
               {formatCurrency(DEFAULT_PIX_AMOUNT)}
             </p>
 
-            <div className="flex gap-3 mt-5">
-              <button onClick={handlePayViaQr} className="btn">
-                Pagar via QR Code
-              </button>
-              <button onClick={handlePayViaKey} className="btn-amber">
-                Pagar via chave
-              </button>
-              <button onClick={handleMarkPaid} className="btn-green">
-                Já paguei
-              </button>
-            </div>
+           <div className="mt-5 inline-flex rounded-2xl bg-slate-900/80 p-2 backdrop-blur-md border border-slate-700">
+
+  <button
+    onClick={handlePayViaKey}
+    className="
+      ml-2 px-6 py-3 rounded-xl
+      text-white font-medium
+      bg-slate-800 hover:bg-slate-700
+      transition
+    "
+  >
+    Copiar chave PIX
+  </button>
+
+  <button onClick={handleSendReceipt} className="ml-2 px-6 py-3 rounded-xl
+      text-white font-medium
+      bg-slate-800 hover:bg-slate-700
+      transition">
+      Enviar comprovante via WhatsApp
+  </button>
+</div>
+
 
             {paymentHint && (
               <div className="mt-4 rounded-lg bg-slate-950/60 border px-4 py-3 text-xs">

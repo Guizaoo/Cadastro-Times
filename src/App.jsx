@@ -227,7 +227,6 @@ function App() {
     return (
       <PaymentPage
         times={times}
-        onMarkPaid={handleStatusChange}
         onNavigateHome={() => navigate('/')}
         onNavigateAdmin={() => navigate('/admin')}
       />
