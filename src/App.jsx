@@ -185,19 +185,23 @@ function App() {
       criadoEm: new Date().toISOString(),
     }
 
-    let savedTeam = novoTime
-    try {
-     const result = await saveTeam(novoTime)
-      savedTeam = { ...novoTime, ...result }
-    } catch (error) {
-      console.error('Erro ao salvar time', error)
-      setErroServidor('Não foi possível salvar no momento. Tente novamente em instantes.')
-      return
-    }
+    let savedTeam
 
-    setTimes((current) => [novoTime, ...current])
-    localStorage.setItem(LAST_PAYMENT_KEY, novoTime.id)
-    navigate(`/pagamento?id=${novoTime.id}`)
+try {
+  const result = await saveTeam(novoTime)
+  savedTeam = { ...novoTime, ...result }
+} catch (error) {
+  console.error('Erro ao salvar time', error)
+  setErroServidor('Não foi possível salvar no momento. Tente novamente em instantes.')
+  return
+}
+
+setTimes((current) => [savedTeam, ...current])
+navigate(`/pagamento?id=${savedTeam.id}`)
+
+
+    setTimes((current) => [savedTeam, ...current])
+    navigate(`/pagamento?id=${savedTeam.id}`)
     setFormData(initialForm)
     setErrors([])
   }

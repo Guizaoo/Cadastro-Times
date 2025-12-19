@@ -17,11 +17,15 @@ const ensureStatus = (team) => ({ ...team, status: normalizeStatus(team.status) 
 
 const toSupabaseTeam = (team) => ({
   id: team.id,
+  nome: team.nome,
   cpf: team.cpf,
   telefone: team.celular,
   nome_time: team.nomeEquipe,
   modalidade: team.modalidade,
   integrantes: team.integrantes,
+  categoria_volei: team.categoriaVolei,
+  status: team.status,
+  criado_em: team.criadoEm,
 })
 
 const fromSupabaseTeam = (team) =>

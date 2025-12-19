@@ -8,13 +8,11 @@ const WHATSAPP_NUMBER = '5598988831316'
 
 // =================================================
 
-
 const formatCurrency = (value) =>
   new Intl.NumberFormat('pt-BR', {
     style: 'currency',
     currency: 'BRL',
   }).format(value)
-
 
 export function PaymentPage({
   times = [],
@@ -25,7 +23,6 @@ export function PaymentPage({
   const keyRef = useRef(null)
   const hasOpenedWhatsapp = useRef(false)
 
-  // 🔹 Estado só para mensagens MANUAIS
   const [manualHint, setManualHint] = useState(
     'O pagamento só será confirmado após a validação do PIX pela organização.'
   )
@@ -44,7 +41,6 @@ export function PaymentPage({
     () => safeTimes.find((item) => item.id === teamId) || safeTimes[0],
     [teamId, safeTimes]
   )
-
 
   const whatsappMessage = useMemo(() => {
     if (!team) return ''
@@ -66,7 +62,6 @@ export function PaymentPage({
     hasOpenedWhatsapp.current = true
   }, [team, whatsappMessage])
 
-  // ✅ useEffect LIMPO (sem setState)
   useEffect(() => {
     if (team?.status === 'pago') {
       openWhatsapp()
@@ -75,7 +70,6 @@ export function PaymentPage({
     }
   }, [team?.status, openWhatsapp])
 
-  // ✅ Hint derivado (React way)
   const paymentHint = useMemo(() => {
     if (team?.status === 'pago') {
       return 'Abrindo WhatsApp para finalizar a validação...'
@@ -148,11 +142,10 @@ export function PaymentPage({
           onNavigateAdmin={onNavigateAdmin}
         />
 
-        {/* HEADER */}
         <header className="rounded-3xl bg-slate-900/80 p-6 shadow-xl">
           <div className="flex justify-between items-start">
             <div>
-              <p className="text-xs tracking-widest text-amber-300 uppercase bg">
+              <p className="text-xs tracking-widest text-amber-300 uppercase">
                 Pagamento PIX
               </p>
               <h1 className="text-2xl font-bold mt-1">
@@ -163,35 +156,33 @@ export function PaymentPage({
           </div>
         </header>
 
-        {/* CONTEÚDO */}
         <section className="grid lg:grid-cols-2 gap-6">
           <div className="rounded-xl bg-slate-900/70 p-5 border border-slate-800">
             <p className="text-3xl font-bold">
               {formatCurrency(DEFAULT_PIX_AMOUNT)}
             </p>
 
-           <div className="mt-5 inline-flex rounded-2xl bg-slate-900/80 p-2 backdrop-blur-md border border-slate-700">
+            <div className="mt-5 inline-flex rounded-2xl bg-slate-900/80 p-2 backdrop-blur-md border border-slate-700">
+              <button
+                onClick={handlePayViaKey}
+                className="ml-2 px-6 py-3 rounded-xl text-white font-medium bg-slate-800 hover:bg-slate-700 transition"
+              >
+                Copiar chave PIX
+              </button>
 
-  <button
-    onClick={handlePayViaKey}
-    className="
-      ml-2 px-6 py-3 rounded-xl
-      text-white font-medium
-      bg-slate-800 hover:bg-slate-700
-      transition
-    "
-  >
-    Copiar chave PIX
-  </button>
+              <button
+                onClick={handlePayViaQr}
+                className="ml-2 px-6 py-3 rounded-xl text-white font-medium bg-slate-800 hover:bg-slate-700 transition"
+              >
+              </button>
 
-  <button onClick={handleSendReceipt} className="ml-2 px-6 py-3 rounded-xl
-      text-white font-medium
-      bg-slate-800 hover:bg-slate-700
-      transition">
-      Enviar comprovante via WhatsApp
-  </button>
-</div>
-
+              <button
+                onClick={handleSendReceipt}
+                className="ml-2 px-6 py-3 rounded-xl text-white font-medium bg-slate-800 hover:bg-slate-700 transition"
+              >
+                Enviar comprovante via WhatsApp
+              </button>
+            </div>
 
             {paymentHint && (
               <div className="mt-4 rounded-lg bg-slate-950/60 border px-4 py-3 text-xs">
@@ -201,12 +192,14 @@ export function PaymentPage({
           </div>
 
           <div ref={qrRef} className="rounded-xl bg-slate-900/70 p-5 text-center">
-            <img src={BANK_QR_IMAGE_PATH} alt="QR Code PIX" className="mx-auto w-64" />
+            <img
+              src={BANK_QR_IMAGE_PATH}
+              alt="QR Code PIX"
+              className="mx-auto w-64"
+            />
           </div>
         </section>
       </div>
     </div>
   )
 }
-
-export { LAST_PAYMENT_KEY }
