@@ -1,4 +1,4 @@
-import { supabase } from './supabase'
+import { supabase, supabaseConfigError } from './supabase'
 
 const VALID_STATUSES = ['pendente', 'pago', 'reprovado']
 const LEGACY_STATUS_MAP = {
@@ -43,6 +43,10 @@ const fromSupabaseTeam = (team) =>
   })
 
 export async function fetchTeams() {
+  if (!supabase) {
+    throw new Error(supabaseConfigError)
+  }
+
   const { data, error } = await supabase
     .from('inscricoes')
     .select('*')
@@ -56,6 +60,10 @@ export async function fetchTeams() {
 }
 
 export async function saveTeam(team) {
+  if (!supabase) {
+    throw new Error(supabaseConfigError)
+  }
+
   const { data, error } = await supabase
     .from('inscricoes')
     .insert([toSupabaseTeam(team)])
@@ -70,6 +78,10 @@ export async function saveTeam(team) {
 }
 
 export async function removeTeam(id) {
+  if (!supabase) {
+    throw new Error(supabaseConfigError)
+  }
+
   const { error } = await supabase
     .from('inscricoes')
     .delete()
@@ -83,6 +95,10 @@ export async function removeTeam(id) {
 }
 
 export async function updateTeamStatus(id, status) {
+  if (!supabase) {
+    throw new Error(supabaseConfigError)
+  }
+
   const { data, error } = await supabase
     .from('inscricoes')
     .update({ status })

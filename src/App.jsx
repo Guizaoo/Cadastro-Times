@@ -94,7 +94,11 @@ function App() {
         setTimes(existentes)
       } catch (error) {
         console.error('Erro ao buscar times', error)
-        setErroServidor('Não foi possível carregar os times salvos. Tente novamente mais tarde.')
+        const message =
+          error?.message?.includes('Supabase não configurado')
+            ? 'Configuração do Supabase ausente. Verifique as variáveis VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.'
+            : 'Não foi possível carregar os times salvos. Tente novamente mais tarde.'
+        setErroServidor(message)
       } finally {
         setCarregando(false)
       }
@@ -187,18 +191,18 @@ function App() {
 
     let savedTeam
 
-try {
-  const result = await saveTeam(novoTime)
-  savedTeam = { ...novoTime, ...result }
-} catch (error) {
-  console.error('Erro ao salvar time', error)
-  setErroServidor('Não foi possível salvar no momento. Tente novamente em instantes.')
-  return
-}
-
-setTimes((current) => [savedTeam, ...current])
-navigate(`/pagamento?id=${savedTeam.id}`)
-
+    try {
+      const result = await saveTeam(novoTime)
+      savedTeam = { ...novoTime, ...result }
+    } catch (error) {
+      console.error('Erro ao salvar time', error)
+      const message =
+        error?.message?.includes('Supabase não configurado')
+          ? 'Configuração do Supabase ausente. Verifique as variáveis VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.'
+          : 'Não foi possível salvar no momento. Tente novamente em instantes.'
+      setErroServidor(message)
+      return
+    }
 
     setTimes((current) => [savedTeam, ...current])
     navigate(`/pagamento?id=${savedTeam.id}`)
