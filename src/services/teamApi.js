@@ -1,5 +1,5 @@
+import { supabase } from './supabase'
 
-const STORAGE_KEY = 'copa:times'
 const VALID_STATUSES = ['pendente', 'pago', 'reprovado']
 const LEGACY_STATUS_MAP = {
   pagamento_pendente: 'pendente',
@@ -13,48 +13,82 @@ const normalizeStatus = (status) => {
   return 'pendente'
 }
 
-const readFromStorage = () => {
-  const raw = localStorage.getItem(STORAGE_KEY)
-  if (!raw) return []
-
-  try {
-    const parsed = JSON.parse(raw)
-    return Array.isArray(parsed) ? parsed : []
-  } catch (error) {
-    console.error('Erro ao ler times salvos', error)
-    return []
-  }
-}
-
-const persist = (times) => {
-  localStorage.setItem(STORAGE_KEY, JSON.stringify(times))
-}
-
 const ensureStatus = (team) => ({ ...team, status: normalizeStatus(team.status) })
 
+const toSupabaseTeam = (team) => ({
+  id: team.id,
+  cpf: team.cpf,
+  telefone: team.celular,
+  nome_time: team.nomeEquipe,
+  modalidade: team.modalidade,
+  integrantes: team.integrantes,
+})
+
+const fromSupabaseTeam = (team) =>
+  ensureStatus({
+    id: team.id,
+    cpf: team.cpf ?? '',
+    celular: team.telefone ?? team.celular ?? '',
+    nomeEquipe: team.nome_time ?? team.nomeEquipe ?? '',
+    modalidade: team.modalidade ?? 'futebol',
+    integrantes: team.integrantes ?? '',
+    nome: team.nome ?? '',
+    categoriaVolei: team.categoria_volei ?? team.categoriaVolei ?? '',
+    status: team.status ?? 'pendente',
+    criadoEm: team.criado_em ?? team.criadoEm ?? '',
+  })
+
 export async function fetchTeams() {
-  const stored = readFromStorage()
-  const normalized = stored.map(ensureStatus)
-  return normalized
+  const { data, error } = await supabase
+    .from('inscricoes')
+    .select('*')
+    .order('criado_em', { ascending: false })
+
+  if (error) {
+    throw error
+  }
+
+  return (data ?? []).map(fromSupabaseTeam)
 }
 
 export async function saveTeam(team) {
-  const existing = readFromStorage()
-  const newList = [ensureStatus(team), ...existing.map(ensureStatus)]
-  persist(newList)
-  return team
+  const { data, error } = await supabase
+    .from('inscricoes')
+    .insert([toSupabaseTeam(team)])
+    .select('*')
+    .single()
+
+  if (error) {
+    throw error
+  }
+
+  return data ? fromSupabaseTeam(data) : team
 }
 
 export async function removeTeam(id) {
-  const existing = readFromStorage()
-  const filtered = existing.filter((team) => team.id !== id)
-  persist(filtered)
-  return filtered
+  const { error } = await supabase
+    .from('inscricoes')
+    .delete()
+    .eq('id', id)
+
+  if (error) {
+    throw error
+  }
+
+  return id
 }
 
 export async function updateTeamStatus(id, status) {
-  const existing = readFromStorage().map(ensureStatus)
-  const updatedList = existing.map((team) => (team.id === id ? { ...team, status } : team))
-  persist(updatedList)
-  return updatedList.find((team) => team.id === id)
+  const { data, error } = await supabase
+    .from('inscricoes')
+    .update({ status })
+    .eq('id', id)
+    .select('*')
+    .single()
+
+  if (error) {
+    throw error
+  }
+
+  return data ? fromSupabaseTeam(data) : null
 }

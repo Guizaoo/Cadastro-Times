@@ -8,7 +8,6 @@ const WHATSAPP_NUMBER = '5598988831316'
 
 // =================================================
 
-const LAST_PAYMENT_KEY = 'copa:lastPaymentTeamId'
 
 const formatCurrency = (value) =>
   new Intl.NumberFormat('pt-BR', {
@@ -33,7 +32,7 @@ export function PaymentPage({
 
   const [teamId] = useState(() => {
     const search = new URLSearchParams(window.location.search)
-    return search.get('id') || localStorage.getItem(LAST_PAYMENT_KEY) || ''
+    return search.get('id') || ''
   })
 
   const safeTimes = useMemo(
@@ -46,11 +45,6 @@ export function PaymentPage({
     [teamId, safeTimes]
   )
 
-  useEffect(() => {
-    if (team?.id) {
-      localStorage.setItem(LAST_PAYMENT_KEY, team.id)
-    }
-  }, [team])
 
   const whatsappMessage = useMemo(() => {
     if (!team) return ''

@@ -2,7 +2,7 @@ import { useEffect, useMemo, useState } from 'react'
 import { AdminPage } from './pages/AdminPage'
 import { HomePage } from './pages/HomePage'
 import { initialForm } from './pages/homePageConfig'
-import { LAST_PAYMENT_KEY, PaymentPage } from './pages/PaymentPage'
+import { PaymentPage } from './pages/PaymentPage'
 import { fetchTeams, removeTeam, saveTeam, updateTeamStatus } from './services/teamApi'
 
 
@@ -185,8 +185,10 @@ function App() {
       criadoEm: new Date().toISOString(),
     }
 
+    let savedTeam = novoTime
     try {
-      await saveTeam(novoTime)
+     const result = await saveTeam(novoTime)
+      savedTeam = { ...novoTime, ...result }
     } catch (error) {
       console.error('Erro ao salvar time', error)
       setErroServidor('Não foi possível salvar no momento. Tente novamente em instantes.')
