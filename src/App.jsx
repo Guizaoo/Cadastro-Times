@@ -81,7 +81,7 @@ const cpfExistsInModalidade = (list, cpfDigits, modalidade) =>
   Boolean(cpfDigits) && list.some((time) => sanitizeDigits(time.cpf) === cpfDigits && time.modalidade === modalidade)
 
 function App() {
-  const [route, setRoute] = useState(window.location.pathname)
+  const [route, setRoute] = useState(() => (window.location.pathname === '/' ? '/acesso' : window.location.pathname))
   const [formData, setFormData] = useState(initialForm)
   const [times, setTimes] = useState([])
   const [carregando, setCarregando] = useState(true)
@@ -109,6 +109,9 @@ function App() {
   }, [])
 
   useEffect(() => {
+    if (window.location.pathname === '/') {
+      window.history.replaceState({}, '', '/acesso')
+    }
     const handlePopState = () => setRoute(window.location.pathname)
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
@@ -237,11 +240,7 @@ function App() {
   const isAuthRoute = route.startsWith('/acesso')
 
   if (isAuthRoute) {
-    return <AuthPage onNavigateHome={() => navigate('/')} />
-  }
-
-  if (isAuthRoute) {
-    return <AuthPage onNavigateHome={() => navigate('/')} />
+    return <AuthPage onNavigateHome={() => navigate('/')} onNavigateAdmin={() => navigate('/admin')} />
   }
 
   if (isPaymentRoute) {

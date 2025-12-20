@@ -22,7 +22,7 @@ const benefits = [
   'Gerencie seus dados e equipes em um só lugar.',
 ]
 
-export function AuthPage({ onNavigateHome }) {
+export function AuthPage({ onNavigateHome, onNavigateAdmin }) {
   const [view, setView] = useState('login')
   const [loginData, setLoginData] = useState(initialLogin)
   const [registerData, setRegisterData] = useState(initialRegister)
@@ -102,6 +102,7 @@ export function AuthPage({ onNavigateHome }) {
         }
 
         setFeedback('Login realizado! Sua sessão fica salva neste navegador.')
+        onNavigateAdmin?.()
       } else {
         if (registerData.senha !== registerData.confirmar) {
           setError('As senhas precisam ser iguais.')
