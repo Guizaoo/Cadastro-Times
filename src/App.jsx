@@ -1,6 +1,6 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AdminPage } from './pages/AdminPage'
-import { AuthPage } from './pages/AuthPage'
+import { AuthPage } from './pages/AuthPage.jsx'
 import { HomePage } from './pages/HomePage'
 import { initialForm } from './pages/homePageConfig'
 import { PaymentPage } from './pages/PaymentPage'
@@ -240,6 +240,10 @@ function App() {
     return <AuthPage onNavigateHome={() => navigate('/')} />
   }
 
+  if (isAuthRoute) {
+    return <AuthPage onNavigateHome={() => navigate('/')} />
+  }
+
   if (isPaymentRoute) {
     return (
       <PaymentPage
@@ -273,7 +277,7 @@ function App() {
       erroServidor={erroServidor}
       handleChange={handleChange}
       handleSubmit={handleSubmit}
-      onNavigateAuth={() => navigate('/acesso')}
+            onNavigateAuth={() => navigate('/acesso')}
       onResetForm={() => {
         setFormData(initialForm)
         setErrors([])

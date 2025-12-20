@@ -1,6 +1,5 @@
-
-
 export function NavigationBar({ onNavigateAdmin, onNavigateAuth, onNavigateHome }) {
+
 return (
     <nav className="flex items-center justify-between gap-4 rounded-2xl border border-white/5 bg-slate-950/50 px-4 py-3 text-sm shadow-inner shadow-black/30">
       <div className="flex items-center gap-2">
@@ -17,7 +16,7 @@ return (
             Página inicial
           </button>
         )}
-        
+
         {onNavigateAuth && (
           <button
             type="button"
