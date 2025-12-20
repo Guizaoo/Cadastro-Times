@@ -25,7 +25,7 @@ const toSupabaseTeam = (team) => ({
   integrantes: team.integrantes,
   categoria_volei: team.categoriaVolei,
   status: team.status,
-  criado_em: team.criadoEm,
+  created_at: team.criadoEm,
 })
 
 const fromSupabaseTeam = (team) =>
@@ -39,7 +39,7 @@ const fromSupabaseTeam = (team) =>
     nome: team.nome ?? '',
     categoriaVolei: team.categoria_volei ?? team.categoriaVolei ?? '',
     status: team.status ?? 'pendente',
-    criadoEm: team.criado_em ?? team.criadoEm ?? '',
+    criadoEm: team.created_at ?? team.criado_em ?? team.criadoEm ?? '',
   })
 
 export async function fetchTeams() {
@@ -50,7 +50,7 @@ export async function fetchTeams() {
   const { data, error } = await supabase
     .from('inscricoes')
     .select('*')
-    .order('criado_em', { ascending: false })
+    .order('created_at', { ascending: false })
 
   if (error) {
     throw error
