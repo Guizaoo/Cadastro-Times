@@ -153,8 +153,8 @@ export function AuthPage({ onNavigateHome, onNavigateAdmin }) {
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8">
         <NavigationBar onNavigateHome={onNavigateHome} />
 
-        <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
-          <section className="rounded-3xl bg-slate-900/80 p-6 shadow-2xl shadow-black/40 ring-1 ring-white/5">
+       <div className="grid place-items-center gap-6">
+          <section className="w-full max-w-xl rounded-3xl bg-slate-900/80 p-6 shadow-2xl shadow-black/40 ring-1 ring-white/5">
             <div className="flex flex-col gap-2">
               <p className="text-xs uppercase tracking-[0.25em] text-amber-200">Área de acesso</p>
               <h1 className="text-3xl font-bold">{isLogin ? 'Entrar na plataforma' : 'Criar sua conta'}</h1>
