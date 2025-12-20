@@ -194,6 +194,7 @@ function App() {
     try {
       const result = await saveTeam(novoTime)
       savedTeam = { ...novoTime, ...result }
+      //erro ao csadastrar
     } catch (error) {
       console.error('Erro ao salvar time', error)
       const message =
