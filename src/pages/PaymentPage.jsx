@@ -141,7 +141,7 @@ export function PaymentPage({
         />
 
         <header className="rounded-3xl bg-slate-900/80 p-6 shadow-xl">
-          <div className="flex justify-between items-start">
+          <div className="flex flex-col gap-4 sm:flex-row sm:justify-between sm:items-start">
             <div>
               <p className="text-xs tracking-widest text-amber-300 uppercase">
                 Pagamento PIX
@@ -149,6 +149,14 @@ export function PaymentPage({
               <h1 className="text-2xl font-bold mt-1">
                 Finalize o cadastro da equipe
               </h1>
+              {onNavigateHome && (
+                <button
+                  onClick={onNavigateHome}
+                  className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-300/50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-amber-100 transition hover:border-amber-200 hover:text-amber-50"
+                >
+                  Voltar para cadastro
+                </button>
+              )}
             </div>
             <StatusBadge status={team.status} />
           </div>
@@ -160,18 +168,30 @@ export function PaymentPage({
               {formatCurrency(DEFAULT_PIX_AMOUNT)}
             </p>
 
+            <div className="mt-4 rounded-xl border border-slate-800 bg-slate-950/40 px-4 py-3">
+              <p className="text-xs uppercase tracking-widest text-slate-400">
+                Identificação do time
+              </p>
+              <div className="mt-2 space-y-1 text-sm">
+                <div className="font-semibold text-slate-50">
+                  {team.nomeEquipe}
+                </div>
+                <div className="text-slate-300">CPF {team.cpf}</div>
+                <div className="text-slate-400">
+                  {team.modalidade}
+                  {team.modalidade === 'volei' && team.categoriaVolei
+                    ? ` • ${team.categoriaVolei}`
+                    : ''}
+                </div>
+              </div>
+            </div>
+
             <div className="mt-5 inline-flex rounded-2xl bg-slate-900/80 p-2 backdrop-blur-md border border-slate-700">
               <button
                 onClick={handlePayViaKey}
                 className="ml-2 px-6 py-3 rounded-xl text-white font-medium bg-slate-800 hover:bg-slate-700 transition"
               >
                 Copiar chave PIX
-              </button>
-
-              <button
-                onClick={handlePayViaQr}
-                className="ml-2 px-6 py-3 rounded-xl text-white font-medium bg-slate-800 hover:bg-slate-700 transition"
-              >
               </button>
 
               <button
