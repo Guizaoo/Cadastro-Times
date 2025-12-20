@@ -139,7 +139,6 @@ export function PaymentPage({
       <div className="mx-auto max-w-5xl px-4 py-10 space-y-8">
         <NavigationBar
           onNavigateHome={onNavigateHome}
-          onNavigateAdmin={onNavigateAdmin}
         />
 
         <header className="rounded-3xl bg-slate-900/80 p-6 shadow-xl">
