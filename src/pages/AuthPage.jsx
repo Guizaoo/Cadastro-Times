@@ -16,11 +16,6 @@ const initialRegister = {
   aceitar: false,
 }
 
-const benefits = [
-  'Acompanhe o status dos cadastros em tempo real.',
-  'Receba lembretes sobre pagamentos e aprovações.',
-  'Gerencie seus dados e equipes em um só lugar.',
-]
 
 export function AuthPage({ onNavigateHome, onNavigateAdmin }) {
   const [view, setView] = useState('login')
@@ -77,6 +72,7 @@ export function AuthPage({ onNavigateHome, onNavigateAdmin }) {
     return registerData.senha === registerData.confirmar ? 'Senha confirmada.' : 'As senhas não conferem.'
   }, [registerData.confirmar, registerData.senha])
 
+  
   const handleSubmit = async (event) => {
     event.preventDefault()
     setFeedback('')
@@ -153,8 +149,8 @@ export function AuthPage({ onNavigateHome, onNavigateAdmin }) {
   }
 
   return (
-    <div className="min-h-screen bg-linear-to-b from-slate-950 via-slate-950 to-amber-900 text-slate-50">
-      <div className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8">
+   <div className="min-h-screen bg-linear-to-b from-slate-950 via-slate-950 to-amber-900 text-slate-50 flex items-center justify-center">
+      <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8">
         <NavigationBar onNavigateHome={onNavigateHome} />
 
         <div className="grid gap-6 lg:grid-cols-[1.1fr_0.9fr]">
@@ -329,27 +325,6 @@ export function AuthPage({ onNavigateHome, onNavigateAdmin }) {
               </div>
             </form>
           </section>
-
-          <aside className="flex flex-col justify-between gap-6 rounded-3xl bg-slate-900/70 p-6 shadow-xl shadow-black/30 ring-1 ring-white/5">
-            <div className="space-y-3">
-              <p className="text-xs uppercase tracking-[0.25em] text-amber-200">Por que acessar?</p>
-              <h2 className="text-2xl font-semibold">Tudo em um painel amigável</h2>
-              <p className="text-sm text-slate-200">
-                Organize seus times, acompanhe pagamentos e tenha atendimento rápido com mensagens prontas.
-              </p>
-              <ul className="space-y-2 text-sm text-slate-300">
-                {benefits.map((item) => (
-                  <li key={item} className="flex items-start gap-2">
-                    <span className="mt-1 h-2 w-2 rounded-full bg-amber-400"></span>
-                    <span>{item}</span>
-                  </li>
-                ))}
-              </ul>
-            </div>
-            <div className="rounded-2xl border border-amber-400/30 bg-amber-500/10 px-4 py-4 text-xs text-amber-100">
-              Os acessos ficam salvos no Supabase Auth. Use as credenciais para entrar novamente com tudo preservado.
-            </div>
-          </aside>
         </div>
       </div>
     </div>

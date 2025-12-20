@@ -239,7 +239,14 @@ function App() {
   const isPaymentRoute = route.startsWith('/pagamento')
   const isAuthRoute = route.startsWith('/acesso')
 
-
+  if (isAuthRoute) {
+    return (
+      <AuthPage
+        onNavigateHome={() => navigate('/')}
+        onNavigateAdmin={() => navigate('/')}
+      />
+    )
+  }
 
   if (isPaymentRoute) {
     return (
@@ -252,18 +259,18 @@ function App() {
   }
 
   if (isAdminRoute) {
-      return (
-        <AdminPage
-          times={times}
-          carregando={carregando}
-          erroServidor={erroServidor}
-          onDelete={handleDelete}
-          onStatusChange={handleStatusChange}
-          onNavigateHome={() => navigate('/')}
-          onNavigateAdmin={() => navigate('/admin')}
-        />
-      )
-    }
+    return (
+      <AdminPage
+        times={times}
+        carregando={carregando}
+        erroServidor={erroServidor}
+        onDelete={handleDelete}
+        onStatusChange={handleStatusChange}
+        onNavigateHome={() => navigate('/')}
+        onNavigateAdmin={() => navigate('/admin')}
+      />
+    )
+  }
 
   return (
     <HomePage
@@ -274,7 +281,8 @@ function App() {
       erroServidor={erroServidor}
       handleChange={handleChange}
       handleSubmit={handleSubmit}
-            onNavigateAuth={() => navigate('/acesso')}
+      onNavigateAdmin={() => navigate('/admin')}
+      onNavigateAuth={() => navigate('/acesso')}
       onResetForm={() => {
         setFormData(initialForm)
         setErrors([])
