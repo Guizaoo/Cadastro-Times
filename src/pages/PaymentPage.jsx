@@ -17,7 +17,6 @@ const formatCurrency = (value) =>
 export function PaymentPage({
   times = [],
   onNavigateHome,
-  onNavigateAdmin,
 }) {
   const qrRef = useRef(null)
   const keyRef = useRef(null)

@@ -1,7 +1,7 @@
 
 
-export function NavigationBar({ onNavigateAdmin, onNavigateHome }) {
-  return (
+export function NavigationBar({ onNavigateAdmin, onNavigateAuth, onNavigateHome }) {
+return (
     <nav className="flex items-center justify-between gap-4 rounded-2xl border border-white/5 bg-slate-950/50 px-4 py-3 text-sm shadow-inner shadow-black/30">
       <div className="flex items-center gap-2">
         <span className="text-xs uppercase tracking-[0.25em] text-amber-200">Copa</span>
@@ -17,6 +17,17 @@ export function NavigationBar({ onNavigateAdmin, onNavigateHome }) {
             Página inicial
           </button>
         )}
+        
+        {onNavigateAuth && (
+          <button
+            type="button"
+            onClick={onNavigateAuth}
+            className="rounded-lg border border-slate-700 px-3 py-2 font-semibold text-slate-100 transition hover:border-amber-400 hover:text-amber-100"
+          >
+            Acesso
+          </button>
+        )}
+
         {onNavigateAdmin && (
           <button
             type="button"
