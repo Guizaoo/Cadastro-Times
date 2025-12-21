@@ -258,7 +258,7 @@ function App() {
     return (
       <AuthPage
         onNavigateHome={() => navigate('/')}
-        onNavigateAdmin={() => navigate('/acessar')}
+        onNavigateAdmin={() => navigate('/acesso')}
       />
     )
   }
