@@ -4,8 +4,8 @@ import { AuthPage } from './pages/AuthPage.jsx'
 import { HomePage } from './pages/HomePage'
 import { initialForm } from './pages/homePageConfig'
 import { PaymentPage } from './pages/PaymentPage'
+import { supabase } from './services/supabase'
 import { cpfAlreadyUsed, fetchTeams, removeTeam, saveTeam, updateTeamStatus } from './services/teamApi'
-
 
 const requiredFields = {
   nome: 'Nome',
@@ -86,6 +86,8 @@ function App() {
   const [carregando, setCarregando] = useState(true)
   const [erroServidor, setErroServidor] = useState('')
   const [errors, setErrors] = useState([])
+  const [authReady, setAuthReady] = useState(false)
+  const [user, setUser] = useState(null)
 
   useEffect(() => {
     const carregarTimes = async () => {
@@ -115,6 +117,29 @@ function App() {
     const handlePopState = () => setRoute(normalizeRoute(window.location.pathname))
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
+  }, [])
+
+  useEffect(() => {
+    if (!supabase) {
+      setAuthReady(true)
+      return
+    }
+
+    supabase.auth.getSession().then(({ data, error }) => {
+      if (!error) {
+        setUser(data.session?.user ?? null)
+      }
+      setAuthReady(true)
+    })
+
+    const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
+      setUser(session?.user ?? null)
+      setAuthReady(true)
+    })
+
+    return () => {
+      listener?.subscription?.unsubscribe()
+    }
   }, [])
 
   const navigate = (path) => {
@@ -257,15 +282,32 @@ function App() {
   const isPaymentRoute = route.startsWith('/pagamento')
   const isAuthRoute = route.startsWith('/acesso')
 
-    if (isAuthRoute) {
+  useEffect(() => {
+    if (!authReady) return
+    if (!user && !isAuthRoute) {
+      navigate('/acesso')
+    } else if (user && isAuthRoute) {
+      navigate('/')
+    }
+  }, [authReady, user, isAuthRoute])
+
+  if (!authReady && !user) {
     return (
       <AuthPage
         onNavigateHome={() => navigate('/')}
-        onNavigateAdmin={() => navigate('/')}
+        onLoginSuccess={() => navigate('/')}
       />
     )
   }
 
+  if (isAuthRoute) {
+    return (
+      <AuthPage
+        onNavigateHome={() => navigate('/')}
+        onLoginSuccess={() => navigate('/')}
+      />
+    )
+  }
 
   if (isPaymentRoute) {
     return (

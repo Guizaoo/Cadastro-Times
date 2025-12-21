@@ -16,8 +16,7 @@ const initialRegister = {
   aceitar: false,
 }
 
-
-export function AuthPage({ onNavigateHome, onNavigateAdmin }) {
+export function AuthPage({ onNavigateHome, onLoginSuccess }) {
   const [view, setView] = useState('login')
   const [loginData, setLoginData] = useState(initialLogin)
   const [registerData, setRegisterData] = useState(initialRegister)
@@ -72,7 +71,6 @@ export function AuthPage({ onNavigateHome, onNavigateAdmin }) {
     return registerData.senha === registerData.confirmar ? 'Senha confirmada.' : 'As senhas não conferem.'
   }, [registerData.confirmar, registerData.senha])
 
-  
   const handleSubmit = async (event) => {
     event.preventDefault()
     setFeedback('')
@@ -105,7 +103,7 @@ export function AuthPage({ onNavigateHome, onNavigateAdmin }) {
             ? 'Login realizado! Sua sessão fica salva neste navegador.'
             : 'Login realizado! Sua sessão será mantida apenas nesta aba.'
         )
-        onNavigateAdmin?.()
+        onLoginSuccess?.()
       } else {
         if (registerData.senha !== registerData.confirmar) {
           setError('As senhas precisam ser iguais.')
@@ -156,11 +154,11 @@ export function AuthPage({ onNavigateHome, onNavigateAdmin }) {
   }
 
   return (
-   <div className="min-h-screen bg-linear-to-b from-slate-950 via-slate-950 to-amber-900 text-slate-50 flex items-center justify-center">
+    <div className="min-h-screen bg-linear-to-b from-slate-950 via-slate-950 to-amber-900 text-slate-50 flex items-center justify-center">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8">
         <NavigationBar onNavigateHome={onNavigateHome} />
 
-       <div className="grid place-items-center gap-6">
+        <div className="grid place-items-center gap-6">
           <section className="w-full max-w-xl rounded-3xl bg-slate-900/80 p-6 shadow-2xl shadow-black/40 ring-1 ring-white/5">
             <div className="flex flex-col gap-2">
               <p className="text-xs uppercase tracking-[0.25em] text-amber-200">Área de acesso</p>
