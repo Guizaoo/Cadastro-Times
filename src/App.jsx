@@ -79,7 +79,11 @@ const parseIntegrantes = (value) => value.split(/[\n,]/).map((item) => item.trim
 const cpfExists = (list, cpfDigits) => Boolean(cpfDigits) && list.some((time) => sanitizeDigits(time.cpf) === cpfDigits)
 
 function App() {
-  const [route, setRoute] = useState(() => (window.location.pathname === '/' ? '/acesso' : window.location.pathname))
+  const normalizeRoute = (path) => (path.startsWith('/acessar') ? '/acesso' : path)
+  const [route, setRoute] = useState(() => {
+    const initialPath = normalizeRoute(window.location.pathname)
+    return initialPath === '/' ? '/acesso' : initialPath
+  })
   const [formData, setFormData] = useState(initialForm)
   const [times, setTimes] = useState([])
   const [carregando, setCarregando] = useState(true)
@@ -107,18 +111,23 @@ function App() {
   }, [])
 
   useEffect(() => {
-    if (window.location.pathname === '/') {
+    const normalizedPath = normalizeRoute(window.location.pathname)
+    if (normalizedPath !== window.location.pathname) {
+      window.history.replaceState({}, '', normalizedPath)
+    }
+    if (normalizedPath === '/') {
       window.history.replaceState({}, '', '/acesso')
     }
-    const handlePopState = () => setRoute(window.location.pathname)
+    const handlePopState = () => setRoute(normalizeRoute(window.location.pathname))
     window.addEventListener('popstate', handlePopState)
     return () => window.removeEventListener('popstate', handlePopState)
   }, [])
 
   const navigate = (path) => {
-    if (path === route) return
-    window.history.pushState({}, '', path)
-    setRoute(path)
+    const normalizedPath = normalizeRoute(path)
+    if (normalizedPath === route) return
+    window.history.pushState({}, '', normalizedPath)
+    setRoute(normalizedPath)
   }
 
   const estatisticas = useMemo(() => {
