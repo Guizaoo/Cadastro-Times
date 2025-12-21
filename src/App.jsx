@@ -4,8 +4,7 @@ import { AuthPage } from './pages/AuthPage.jsx'
 import { HomePage } from './pages/HomePage'
 import { initialForm } from './pages/homePageConfig'
 import { PaymentPage } from './pages/PaymentPage'
-import { fetchTeams, removeTeam, saveTeam, updateTeamStatus } from './services/teamApi'
-
+import { cpfAlreadyUsed, fetchTeams, removeTeam, saveTeam, updateTeamStatus } from './services/teamApi'
 
 
 const requiredFields = {
@@ -77,8 +76,7 @@ const validateCelular = (value) => {
 const parseIntegrantes = (value) => value.split(/[\n,]/).map((item) => item.trim()).filter(Boolean)
 
 // limitando cpf
-const cpfExistsInModalidade = (list, cpfDigits, modalidade) =>
-  Boolean(cpfDigits) && list.some((time) => sanitizeDigits(time.cpf) === cpfDigits && time.modalidade === modalidade)
+const cpfExists = (list, cpfDigits) => Boolean(cpfDigits) && list.some((time) => sanitizeDigits(time.cpf) === cpfDigits)
 
 function App() {
   const [route, setRoute] = useState(() => (window.location.pathname === '/' ? '/acesso' : window.location.pathname))
@@ -157,12 +155,9 @@ function App() {
       ...(missing.length ? missing : []),
       ...(!validateCPF(formData.cpf) ? ['CPF inválido'] : []),
       ...(!validateCelular(formData.celular) ? ['Número de celular inválido (use DDD e 9 dígitos)'] : []),
-      // Impede o mesmo CPF de cadastrar mais de um time na mesma modalidade
-      ...(
-        cpfExistsInModalidade(times, cpfDigits, formData.modalidade)
-          ? [`Este CPF já possui um time de ${formData.modalidade === 'futebol' ? 'futebol' : 'vôlei'} cadastrado.`]
-          : []
-      ),
+      
+      // Impede o mesmo CPF de cadastrar mais de um time
+      ...(cpfExists(times, cpfDigits) ? ['Este CPF já possui um time cadastrado.'] : []),
       ...(formData.modalidade === 'futebol' && integrantesList.length > 15
         ? ['Limite de 15 integrantes para futebol']
         : []),
@@ -179,6 +174,22 @@ function App() {
     const integrantesFormatados = integrantesList.join(', ')
     const cpfFormatado = formatCPF(formData.cpf)
     const celularFormatado = formatCelular(formData.celular)
+
+    try {
+      const cpfEmUso = await cpfAlreadyUsed(cpfFormatado, cpfDigits)
+      if (cpfEmUso) {
+        setErrors(['Este CPF já está sendo usado em outra conta.'])
+        return
+      }
+    } catch (error) {
+      console.error('Erro ao validar CPF', error)
+      const message =
+        error?.message?.includes('Supabase não configurado')
+          ? 'Configuração do Supabase ausente. Verifique as variáveis VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.'
+          : 'Não foi possível validar o CPF no momento. Tente novamente mais tarde.'
+      setErroServidor(message)
+      return
+    }
 
     const novoTime = {
       ...formData,
@@ -201,6 +212,10 @@ function App() {
       //erro ao csadastrar
     } catch (error) {
       console.error('Erro ao salvar time', error)
+      if (error?.code === '23505') {
+        setErrors(['Este CPF já está cadastrado.'])
+        return
+      }
       const message =
         error?.message?.includes('Supabase não configurado')
           ? 'Configuração do Supabase ausente. Verifique as variáveis VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.'

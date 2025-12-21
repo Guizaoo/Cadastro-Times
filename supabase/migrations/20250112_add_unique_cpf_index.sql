@@ -1,0 +1,1 @@
+create unique index if not exists inscricoes_cpf_unique on public.inscricoes (cpf);

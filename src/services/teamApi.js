@@ -77,6 +77,38 @@ export async function saveTeam(team) {
   return data ? fromSupabaseTeam(data) : team
 }
 
+export async function cpfAlreadyUsed(cpf, cpfDigits = '') {
+  if (!supabase) {
+    throw new Error(supabaseConfigError)
+  }
+
+  const cpfValue = cpf?.trim()
+  if (cpfValue) {
+    const { data, error } = await supabase.from('inscricoes').select('id').eq('cpf', cpfValue).limit(1).maybeSingle()
+
+    if (error) {
+      throw error
+    }
+
+    if (data?.id) {
+      return true
+    }
+  }
+
+  if (!cpfDigits || cpfDigits === cpfValue) {
+    return false
+  }
+
+  const { data, error } = await supabase.from('inscricoes').select('id').eq('cpf', cpfDigits).limit(1).maybeSingle()
+
+  if (error) {
+    throw error
+  }
+
+  return Boolean(data?.id)
+}
+
+
 export async function removeTeam(id) {
   if (!supabase) {
     throw new Error(supabaseConfigError)
