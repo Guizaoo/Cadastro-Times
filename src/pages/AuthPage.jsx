@@ -1,6 +1,6 @@
 import React, { useEffect, useMemo, useState } from 'react'
 import { InputField, NavigationBar } from '../components/ui'
-import { supabase, supabaseConfigError } from '../services/supabase'
+import { authRememberKey, supabase, supabaseConfigError } from '../services/supabase'
 
 const initialLogin = {
   email: '',
@@ -87,6 +87,9 @@ export function AuthPage({ onNavigateHome, onNavigateAdmin }) {
 
     try {
       if (isLogin) {
+        if (typeof window !== 'undefined') {
+          window.localStorage.setItem(authRememberKey, loginData.lembrar ? 'true' : 'false')
+        }
         const { error: signInError } = await supabase.auth.signInWithPassword({
           email: loginData.email,
           password: loginData.senha,
@@ -97,7 +100,11 @@ export function AuthPage({ onNavigateHome, onNavigateAdmin }) {
           return
         }
 
-        setFeedback('Login realizado! Sua sessão fica salva neste navegador.')
+        setFeedback(
+          loginData.lembrar
+            ? 'Login realizado! Sua sessão fica salva neste navegador.'
+            : 'Login realizado! Sua sessão será mantida apenas nesta aba.'
+        )
         onNavigateAdmin?.()
       } else {
         if (registerData.senha !== registerData.confirmar) {

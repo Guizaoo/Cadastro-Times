@@ -254,14 +254,15 @@ function App() {
   const isPaymentRoute = route.startsWith('/pagamento')
   const isAuthRoute = route.startsWith('/acesso')
 
-  if (isAuthRoute) {
+    if (isAuthRoute) {
     return (
       <AuthPage
         onNavigateHome={() => navigate('/')}
-        onNavigateAdmin={() => navigate('/')}
+        onNavigateAdmin={() => navigate('/acessar')}
       />
     )
   }
+
 
   if (isPaymentRoute) {
     return (
