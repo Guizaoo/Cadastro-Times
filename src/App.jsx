@@ -80,10 +80,7 @@ const cpfExists = (list, cpfDigits) => Boolean(cpfDigits) && list.some((time) =>
 
 function App() {
   const normalizeRoute = (path) => (path.startsWith('/acessar') ? '/acesso' : path)
-  const [route, setRoute] = useState(() => {
-    const initialPath = normalizeRoute(window.location.pathname)
-    return initialPath === '/' ? '/acesso' : initialPath
-  })
+  const [route, setRoute] = useState(() => normalizeRoute(window.location.pathname))
   const [formData, setFormData] = useState(initialForm)
   const [times, setTimes] = useState([])
   const [carregando, setCarregando] = useState(true)
@@ -114,9 +111,6 @@ function App() {
     const normalizedPath = normalizeRoute(window.location.pathname)
     if (normalizedPath !== window.location.pathname) {
       window.history.replaceState({}, '', normalizedPath)
-    }
-    if (normalizedPath === '/') {
-      window.history.replaceState({}, '', '/acesso')
     }
     const handlePopState = () => setRoute(normalizeRoute(window.location.pathname))
     window.addEventListener('popstate', handlePopState)
@@ -267,7 +261,7 @@ function App() {
     return (
       <AuthPage
         onNavigateHome={() => navigate('/')}
-        onNavigateAdmin={() => navigate('/acesso')}
+        onNavigateAdmin={() => navigate('/')}
       />
     )
   }
