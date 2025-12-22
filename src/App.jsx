@@ -183,7 +183,7 @@ function App() {
       ...(missing.length ? missing : []),
       ...(!validateCPF(formData.cpf) ? ['CPF inválido'] : []),
       ...(!validateCelular(formData.celular) ? ['Número de celular inválido (use DDD e 9 dígitos)'] : []),
-      
+
       // Impede o mesmo CPF de cadastrar mais de um time
       ...(cpfExists(times, cpfDigits) ? ['Este CPF já possui um time cadastrado.'] : []),
       ...(formData.modalidade === 'futebol' && integrantesList.length > 15
@@ -284,10 +284,21 @@ function App() {
 
   useEffect(() => {
     if (!authReady) return
-    if (user && isAuthRoute) {
+    if (!user && !isAuthRoute) {
+      navigate('/acesso')
+    } else if (user && isAuthRoute) {
       navigate('/')
     }
   }, [authReady, user, isAuthRoute])
+
+  if (!authReady && !user) {
+    return (
+      <AuthPage
+        onNavigateHome={() => navigate('/')}
+        onLoginSuccess={() => navigate('/')}
+      />
+    )
+  }
 
   if (isAuthRoute) {
     return (
@@ -309,15 +320,6 @@ function App() {
   }
 
   if (isAdminRoute) {
-    if (!user) {
-      return (
-        <AuthPage
-          onNavigateHome={() => navigate('/')}
-          onLoginSuccess={() => navigate('/admin')}
-        />
-      )
-    }
-
     return (
       <AdminPage
         times={times}

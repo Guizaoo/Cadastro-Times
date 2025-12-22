@@ -1,12 +1,11 @@
 import React from 'react'
-import { InputField, NavigationBar, StatCard } from '../components/ui'
+import { InputField, NavigationBar } from '../components/ui'
 
 import { sportOptions } from './homePageConfig'
 
 export function HomePage({
   formData,
   setFormData,
-  estatisticas,
   errors,
   erroServidor,
   handleChange,
@@ -32,16 +31,6 @@ export function HomePage({
               O formulário pede somente o essencial (nome, equipe, integrantes, CPF e celular) para que cada clube se sinta
               convidado desde o primeiro clique.
             </p>
-          </div>
-          <div className="grid grid-cols-2 gap-3 sm:grid-cols-4">
-            <StatCard label="Times na Copa" value={estatisticas.total} />
-            <StatCard label="Modalidades" value={estatisticas.modalidades} />
-            <StatCard label="Categorias de vôlei" value={estatisticas.categoriasVolei} />
-            <StatCard label="Contatos enviados" value={estatisticas.contatos} />
-          </div>
-          <div className="flex flex-wrap gap-3 text-xs text-amber-100">
-            <span className="rounded-full bg-amber-500/15 px-3 py-1">Ambiente acolhedor para atletas e torcedores</span>
-            <span className="rounded-full bg-amber-400/15 px-3 py-1 text-amber-50">Comunicação humana e transparente</span>
           </div>
         </header>
 
