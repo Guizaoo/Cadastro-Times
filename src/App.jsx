@@ -284,21 +284,10 @@ function App() {
 
   useEffect(() => {
     if (!authReady) return
-    if (!user && !isAuthRoute) {
-      navigate('/acesso')
-    } else if (user && isAuthRoute) {
+    if (user && isAuthRoute) {
       navigate('/')
     }
   }, [authReady, user, isAuthRoute])
-
-  if (!authReady && !user) {
-    return (
-      <AuthPage
-        onNavigateHome={() => navigate('/')}
-        onLoginSuccess={() => navigate('/')}
-      />
-    )
-  }
 
   if (isAuthRoute) {
     return (
@@ -320,6 +309,15 @@ function App() {
   }
 
   if (isAdminRoute) {
+    if (!user) {
+      return (
+        <AuthPage
+          onNavigateHome={() => navigate('/')}
+          onLoginSuccess={() => navigate('/admin')}
+        />
+      )
+    }
+
     return (
       <AdminPage
         times={times}
