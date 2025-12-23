@@ -252,12 +252,14 @@ function App() {
       return
     }
 
+// adicionar time à lista
     setTimes((current) => [savedTeam, ...current])
     navigate(`/pagamento?id=${savedTeam.id}`)
     setFormData(initialForm)
     setErrors([])
   }
 
+  // remover time
   const handleDelete = async (timeId) => {
     try {
       await removeTeam(timeId)
@@ -268,6 +270,7 @@ function App() {
     }
   }
 
+  // atualizar status do time
   const handleStatusChange = async (timeId, status) => {
     try {
       await updateTeamStatus(timeId, status)
@@ -278,10 +281,12 @@ function App() {
     }
   }
 
+  // determinar qual página renderizar
   const isAdminRoute = route.startsWith('/admin')
   const isPaymentRoute = route.startsWith('/pagamento')
   const isAuthRoute = route.startsWith('/acesso')
 
+  //redirecionar se não autenticado
   useEffect(() => {
     if (!authReady) return
     if (!user && !isAuthRoute) {
@@ -291,6 +296,7 @@ function App() {
     }
   }, [authReady, user, isAuthRoute])
 
+  // mostrar página de autenticação enquanto verifica
   if (!authReady && !user) {
     return (
       <AuthPage
@@ -300,6 +306,7 @@ function App() {
     )
   }
 
+ // renderizar páginas conforme a rota
   if (isAuthRoute) {
     return (
       <AuthPage
@@ -309,6 +316,7 @@ function App() {
     )
   }
 
+// renderizar página de pagamento
   if (isPaymentRoute) {
     return (
       <PaymentPage
@@ -319,6 +327,7 @@ function App() {
     )
   }
 
+// renderizar página admin
   if (isAdminRoute) {
     return (
       <AdminPage
@@ -332,7 +341,7 @@ function App() {
       />
     )
   }
-
+// renderizar página inicial
   return (
     <HomePage
       formData={formData}
