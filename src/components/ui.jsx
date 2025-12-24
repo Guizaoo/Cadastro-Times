@@ -1,7 +1,18 @@
 export function NavigationBar({ onNavigateCart, onNavigateLogin }) {
   return (
     <nav className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-800/70 bg-slate-900/60 px-4 py-3 text-xs uppercase tracking-[0.2em] text-slate-200 shadow-lg shadow-black/30">
-      <div className="flex flex-wrap items-center gap-3">
+      <div className="flex flex-1 items-center justify-start">
+        {onNavigateLogin && (
+          <button
+            type="button"
+            onClick={onNavigateLogin}
+            className="rounded-full border border-transparent px-3 py-2 font-semibold text-slate-200 transition hover:border-amber-400 hover:text-amber-100"
+          >
+            Voltar ao login
+          </button>
+        )}
+      </div>
+      <div className="flex flex-1 items-center justify-end">
         {onNavigateCart && (
           <button
             type="button"
@@ -23,15 +34,6 @@ export function NavigationBar({ onNavigateCart, onNavigateLogin }) {
               <circle cx="18" cy="19" r="1.4" />
             </svg>
             Carrinho
-          </button>
-        )}
-        {onNavigateLogin && (
-          <button
-            type="button"
-            onClick={onNavigateLogin}
-            className="rounded-full border border-transparent px-3 py-2 font-semibold text-slate-200 transition hover:border-amber-400 hover:text-amber-100"
-          >
-            Voltar ao login
           </button>
         )}
       </div>
