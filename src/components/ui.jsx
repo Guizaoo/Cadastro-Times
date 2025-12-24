@@ -4,6 +4,7 @@ export function NavigationBar({
   onNavigateLogin,
   userDisplayName,
 }) {
+  // Navegação simples para páginas internas (carrinho, admin, pagamento)
   return (
     <nav className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-800/70 bg-slate-900/60 px-4 py-3 text-xs uppercase tracking-[0.2em] text-slate-200 shadow-lg shadow-black/30">
       <div className="flex flex-1 items-center justify-start">

@@ -308,12 +308,20 @@ function App() {
   }, [authReady, user, isAuthRoute])
 
   const handleLogout = async () => {
-    if (!supabase) return
-    try {
-      await supabase.auth.signOut()
+    setUser(null)
+    if (!supabase) {
       navigate('/acesso')
+      return
+    }
+    try {
+      const { error } = await supabase.auth.signOut()
+      if (error) {
+        console.error('Erro ao sair', error)
+      }
     } catch (error) {
       console.error('Erro ao sair', error)
+    } finally {
+      navigate('/acesso')
     }
   }
 
