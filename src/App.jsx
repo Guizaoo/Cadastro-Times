@@ -92,11 +92,18 @@ function App() {
 
   const displayName = useMemo(() => {
     if (!user) return ''
+    const pickShortName = (value) => {
+      const cleaned = value.trim()
+      if (!cleaned) return ''
+      const parts = cleaned.split(/\s+/).filter(Boolean)
+      return parts.slice(0, 2).join(' ')
+    }
     const fullName = user.user_metadata?.full_name?.trim()
-    if (fullName) return fullName
+        if (fullName) return pickShortName(fullName)
     const email = user.email?.trim()
     if (!email) return ''
-    return email.split('@')[0]
+    const emailName = email.split('@')[0].replace(/[._-]+/g, ' ')
+    return pickShortName(emailName)
   }, [user])
 
   useEffect(() => {

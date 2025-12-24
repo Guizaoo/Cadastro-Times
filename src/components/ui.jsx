@@ -39,12 +39,16 @@ export function NavigationBar({
           </button>
         )}
       </div>
-      <div className="flex flex-1 items-center justify-end gap-3">
+      <div className="flex flex-1 items-center justify-center">
         {userDisplayName && (
-          <span className="text-[11px] font-semibold uppercase tracking-[0.2em] text-slate-300">
-            Olá, <span className="text-amber-200">{userDisplayName}</span>
-          </span>
+          <div className="flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-500/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-100 shadow-inner shadow-black/30">
+            <span className="text-amber-200">Olá</span>
+            <span className="text-slate-100">•</span>
+            <span className="text-amber-100">{userDisplayName}</span>
+          </div>
         )}
+        </div>
+      <div className="flex flex-1 items-center justify-end gap-3">
         {onNavigateCart && (
           <button
             type="button"
