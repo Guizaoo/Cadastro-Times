@@ -1,7 +1,32 @@
-export function NavigationBar({ onNavigateCart, onNavigateLogin }) {
+export function NavigationBar({
+  onNavigateBackToRegister,
+  onNavigateCart,
+  onNavigateLogin,
+}) {
   return (
     <nav className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-800/70 bg-slate-900/60 px-4 py-3 text-xs uppercase tracking-[0.2em] text-slate-200 shadow-lg shadow-black/30">
       <div className="flex flex-1 items-center justify-start">
+        {onNavigateBackToRegister && (
+          <button
+            type="button"
+            onClick={onNavigateBackToRegister}
+            className="inline-flex items-center gap-2 rounded-full border border-transparent px-3 py-2 font-semibold text-slate-200 transition hover:border-amber-400 hover:text-amber-100"
+          >
+            <svg
+              aria-hidden="true"
+              viewBox="0 0 24 24"
+              className="h-4 w-4 text-amber-200"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.8"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+            >
+              <path d="M15 18l-6-6 6-6" />
+            </svg>
+            Voltar ao Cadastro
+          </button>
+        )}
         {onNavigateLogin && (
           <button
             type="button"

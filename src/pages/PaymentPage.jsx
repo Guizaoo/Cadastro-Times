@@ -1,5 +1,5 @@
 import React, { useCallback, useEffect, useMemo, useRef, useState } from 'react'
-import { NavigationBar, StatusBadge } from '../components/ui'
+import { StatusBadge } from '../components/ui'
 
 const DEFAULT_PIX_KEY = '98988831316'
 const DEFAULT_PIX_AMOUNT = 0.1
@@ -138,12 +138,7 @@ export function PaymentPage({
   return (
     <div className="min-h-screen bg-linear-to-b from-slate-950 via-slate-950 to-amber-900 text-slate-50">
       <div className="mx-auto max-w-5xl px-4 py-10 space-y-8">
-        <NavigationBar
-          onNavigateHome={onNavigateHome}
-          onNavigateCart={onNavigateCart}
-          onNavigatePayment={onNavigatePayment}
-        />
-
+      
         <header className="rounded-3xl border border-slate-800/60 bg-slate-900/80 p-6 shadow-xl">
           <div className="flex flex-col gap-4 sm:flex-row sm:items-start sm:justify-between">
             <div>
