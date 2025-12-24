@@ -1,6 +1,7 @@
 import { useEffect, useMemo, useState } from 'react'
 import { AdminPage } from './pages/AdminPage'
 import { AuthPage } from './pages/AuthPage.jsx'
+import { CartPage } from './pages/CartPage'
 import { HomePage } from './pages/HomePage'
 import { initialForm } from './pages/homePageConfig'
 import { PaymentPage } from './pages/PaymentPage'
@@ -254,7 +255,7 @@ function App() {
 
 // adicionar time à lista
     setTimes((current) => [savedTeam, ...current])
-    navigate(`/pagamento?id=${savedTeam.id}`)
+    navigate('/carrinho')
     setFormData(initialForm)
     setErrors([])
   }
@@ -284,6 +285,7 @@ function App() {
   // determinar qual página renderizar
   const isAdminRoute = route.startsWith('/admin')
   const isPaymentRoute = route.startsWith('/pagamento')
+  const isCartRoute = route.startsWith('/carrinho')
   const isAuthRoute = route.startsWith('/acesso')
 
   //redirecionar se não autenticado
@@ -322,7 +324,20 @@ function App() {
       <PaymentPage
         times={times}
         onNavigateHome={() => navigate('/')}
-        onNavigateAdmin={() => navigate('/admin')}
+        onNavigateCart={() => navigate('/carrinho')}
+        onNavigatePayment={() => navigate('/pagamento')}
+      />
+    )
+  }
+
+// renderizar página do carrinho
+  if (isCartRoute) {
+    return (
+      <CartPage
+        times={times}
+        onNavigateHome={() => navigate('/')}
+        onNavigateCart={() => navigate('/carrinho')}
+        onNavigatePayment={(id) => navigate(`/pagamento?id=${id}`)}
       />
     )
   }
@@ -337,7 +352,7 @@ function App() {
         onDelete={handleDelete}
         onStatusChange={handleStatusChange}
         onNavigateHome={() => navigate('/')}
-        onNavigateAdmin={() => navigate('/admin')}
+        onNavigateCart={() => navigate('/carrinho')}
       />
     )
   }
@@ -351,8 +366,9 @@ function App() {
       erroServidor={erroServidor}
       handleChange={handleChange}
       handleSubmit={handleSubmit}
-      onNavigateAdmin={() => navigate('/admin')}
       onNavigateAuth={() => navigate('/acesso')}
+      onNavigateCart={() => navigate('/carrinho')}
+      onNavigatePayment={() => navigate('/pagamento')}
       onResetForm={() => {
         setFormData(initialForm)
         setErrors([])

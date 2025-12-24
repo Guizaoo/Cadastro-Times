@@ -10,14 +10,19 @@ export function HomePage({
   erroServidor,
   handleChange,
   handleSubmit,
-  onNavigateAdmin,
   onNavigateAuth,
+  onNavigateCart,
+  onNavigatePayment,
   onResetForm,
 }) {
   return (
     <div className="min-h-screen bg-linear-to-b from-amber-900 via-slate-950 to-slate-950 text-slate-50">
       <div className="mx-auto flex max-w-5xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8">
-        <NavigationBar onNavigateAdmin={onNavigateAdmin} onNavigateAuth={onNavigateAuth} />
+        <NavigationBar
+          onNavigateAuth={onNavigateAuth}
+          onNavigateCart={onNavigateCart}
+          onNavigatePayment={onNavigatePayment}
+        />
 
         <header className="flex flex-col gap-5 rounded-3xl bg-slate-900/80 p-6 shadow-2xl shadow-black/40 ring-1 ring-white/5">
           <div className="flex flex-col gap-2">

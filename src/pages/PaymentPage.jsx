@@ -17,6 +17,8 @@ const formatCurrency = (value) =>
 export function PaymentPage({
   times = [],
   onNavigateHome,
+  onNavigateCart,
+  onNavigatePayment,
 }) {
   const qrRef = useRef(null)
   const keyRef = useRef(null)
@@ -138,6 +140,8 @@ export function PaymentPage({
       <div className="mx-auto max-w-5xl px-4 py-10 space-y-8">
         <NavigationBar
           onNavigateHome={onNavigateHome}
+          onNavigateCart={onNavigateCart}
+          onNavigatePayment={onNavigatePayment}
         />
 
         <header className="rounded-3xl border border-slate-800/60 bg-slate-900/80 p-6 shadow-xl">
@@ -159,6 +163,14 @@ export function PaymentPage({
                   className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-300/50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-amber-100 transition hover:border-amber-200 hover:text-amber-50"
                 >
                   Voltar para cadastro
+                </button>
+              )}
+              {onNavigateCart && (
+                <button
+                  onClick={onNavigateCart}
+                  className="mt-2 inline-flex items-center gap-2 rounded-full border border-slate-700 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-100 transition hover:border-amber-200 hover:text-amber-50"
+                >
+                  Voltar para o carrinho
                 </button>
               )}
             </div>
