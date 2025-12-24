@@ -14,6 +14,7 @@ export function HomePage({
   onNavigateCart,
   onNavigatePayment,
   onResetForm,
+  userDisplayName,
 }) {
   return (
     <div className="min-h-screen bg-linear-to-b from-amber-900 via-slate-950 to-slate-950 text-slate-50">
@@ -23,6 +24,7 @@ export function HomePage({
           onNavigateCart={onNavigateCart}
           onNavigatePayment={onNavigatePayment}
           onNavigateLogin={onNavigateAuth}
+          userDisplayName={userDisplayName}
         />
 
         <header className="flex flex-col gap-5 rounded-3xl bg-slate-900/80 p-6 shadow-2xl shadow-black/40 ring-1 ring-white/5">

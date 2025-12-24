@@ -14,6 +14,7 @@ export function CartPage({
   onNavigateHome,
   onNavigatePayment,
   onNavigateCart,
+  userDisplayName,
 }) {
   const pendentes = useMemo(
     () =>
@@ -39,6 +40,7 @@ export function CartPage({
           onNavigateCart={onNavigateCart}
           onNavigatePayment={handleNavigatePayment}
           onNavigateBackToRegister={onNavigateHome} // botao de retornar ao formulario
+          userDisplayName={userDisplayName}
         />
 
         {/* 🔹 HEADER */}

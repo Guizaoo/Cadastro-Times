@@ -90,6 +90,15 @@ function App() {
   const [authReady, setAuthReady] = useState(false)
   const [user, setUser] = useState(null)
 
+  const displayName = useMemo(() => {
+    if (!user) return ''
+    const fullName = user.user_metadata?.full_name?.trim()
+    if (fullName) return fullName
+    const email = user.email?.trim()
+    if (!email) return ''
+    return email.split('@')[0]
+  }, [user])
+
   useEffect(() => {
     const carregarTimes = async () => {
       try {
@@ -282,19 +291,6 @@ function App() {
     }
   }
 
-  const handleLogout = async () => {
-    if (supabase) {
-      try {
-        await supabase.auth.signOut()
-      } catch (error) {
-        console.error('Erro ao sair da conta', error)
-      }
-    }
-
-    setUser(null)
-    navigate('/acesso')
-  }
-
   // determinar qual página renderizar
   const isAdminRoute = route.startsWith('/admin')
   const isPaymentRoute = route.startsWith('/pagamento')
@@ -310,6 +306,16 @@ function App() {
       navigate('/')
     }
   }, [authReady, user, isAuthRoute])
+
+  const handleLogout = async () => {
+    if (!supabase) return
+    try {
+      await supabase.auth.signOut()
+      navigate('/acesso')
+    } catch (error) {
+      console.error('Erro ao sair', error)
+    }
+  }
 
   // mostrar página de autenticação enquanto verifica
   if (!authReady && !user) {
@@ -352,6 +358,7 @@ function App() {
         onNavigateCart={() => navigate('/carrinho')}
         onNavigatePayment={(id) => navigate(`/pagamento?id=${id}`)}
         onNavigateLogin={() => navigate('/acesso')}
+        userDisplayName={displayName}
       />
     )
   }
@@ -367,6 +374,7 @@ function App() {
         onStatusChange={handleStatusChange}
         onNavigateHome={() => navigate('/')}
         onNavigateCart={() => navigate('/carrinho')}
+        userDisplayName={displayName}
       />
     )
   }
@@ -389,6 +397,7 @@ function App() {
         setErrors([])
       }}
       times={times}
+      userDisplayName={displayName}
     />
   )
 }

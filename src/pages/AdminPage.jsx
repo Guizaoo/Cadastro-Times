@@ -1,8 +1,6 @@
 import React, { useMemo } from 'react'
 import { NavigationBar, SmallStat, StatusBadge } from '../components/ui'
 
-
-
 const formatCreatedAt = (dateString) =>
   new Date(dateString).toLocaleDateString('pt-BR', {
     day: '2-digit',
@@ -11,7 +9,7 @@ const formatCreatedAt = (dateString) =>
     minute: '2-digit',
   })
 
-export function AdminPage({ times, carregando, erroServidor, onDelete, onStatusChange, onNavigateHome }) {
+export function AdminPage({ times, carregando, erroServidor, onDelete, onStatusChange, onNavigateHome, userDisplayName }) {
   const { pagos, reprovados, pendentes } = useMemo(
     () => ({
       pagos: times.filter((time) => time.status === 'pago').length,
@@ -24,7 +22,7 @@ export function AdminPage({ times, carregando, erroServidor, onDelete, onStatusC
   return (
     <div className="min-h-screen bg-linear-to-b from-slate-950 via-slate-950 to-amber-900 text-slate-50">
       <div className="mx-auto flex max-w-6xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8">
-        <NavigationBar onNavigateHome={onNavigateHome} />
+        <NavigationBar onNavigateHome={onNavigateHome} userDisplayName={userDisplayName} />
 
         <header className="flex flex-col gap-4 rounded-3xl bg-slate-900/80 p-6 shadow-2xl shadow-black/40 ring-1 ring-white/5">
           <div className="flex items-center justify-between">
