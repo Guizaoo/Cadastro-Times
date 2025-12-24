@@ -18,11 +18,6 @@ const requiredFields = {
 
 const normalizeText = (value) => value.trim()
 const sanitizeDigits = (value) => value.replace(/\D+/g, '')
-const parseAdminEmails = (value = '') =>
-  value
-    .split(',')
-    .map((email) => email.trim().toLowerCase())
-    .filter(Boolean)
 
 const formatCPF = (value) => {
   const digits = sanitizeDigits(value)
@@ -94,8 +89,6 @@ function App() {
   const [errors, setErrors] = useState([])
   const [authReady, setAuthReady] = useState(false)
   const [user, setUser] = useState(null)
-  const adminEmails = useMemo(() => parseAdminEmails(import.meta.env.VITE_ADMIN_EMAILS), [])
-  const isAdmin = Boolean(user?.email) && adminEmails.includes(user.email.toLowerCase())
 
   useEffect(() => {
     const carregarTimes = async () => {
@@ -345,41 +338,13 @@ function App() {
         onNavigateHome={() => navigate('/')}
         onNavigateCart={() => navigate('/carrinho')}
         onNavigatePayment={(id) => navigate(`/pagamento?id=${id}`)}
+        onNavigateLogin={() => navigate('/acesso')}
       />
     )
   }
 
 // renderizar página admin
   if (isAdminRoute) {
-    if (!isAdmin) {
-      return (
-        <div className="min-h-screen bg-linear-to-b from-slate-950 via-slate-950 to-amber-900 text-slate-50">
-          <div className="mx-auto flex max-w-4xl flex-col gap-6 px-4 py-10 sm:px-6 lg:px-8">
-            <div className="rounded-3xl border border-slate-800/70 bg-slate-900/80 p-6 shadow-2xl shadow-black/40 ring-1 ring-white/5">
-              <p className="text-xs uppercase tracking-[0.25em] text-amber-200">Acesso restrito</p>
-              <h1 className="mt-2 text-3xl font-bold">Somente administradores</h1>
-              <p className="mt-4 text-sm text-slate-200">
-                O e-mail <strong>{user?.email ?? 'informado'}</strong> não está autorizado a acessar o painel.
-              </p>
-              {adminEmails.length === 0 && (
-                <p className="mt-2 text-xs text-slate-400">
-                  
-                </p>
-              )}
-              <div className="mt-6">
-                <button
-                  type="button"
-                  onClick={() => navigate('/')}
-                  className="rounded-full border border-slate-700 px-4 py-2 text-xs font-semibold uppercase tracking-[0.2em] text-slate-200 transition hover:border-amber-400 hover:text-amber-100"
-                >
-                  Voltar para o início
-                </button>
-              </div>
-            </div>
-          </div>
-        </div>
-      )
-    }
     return (
       <AdminPage
         times={times}

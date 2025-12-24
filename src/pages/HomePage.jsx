@@ -22,6 +22,7 @@ export function HomePage({
           onNavigateAuth={onNavigateAuth}
           onNavigateCart={onNavigateCart}
           onNavigatePayment={onNavigatePayment}
+          onNavigateLogin={onNavigateAuth}
         />
 
         <header className="flex flex-col gap-5 rounded-3xl bg-slate-900/80 p-6 shadow-2xl shadow-black/40 ring-1 ring-white/5">
