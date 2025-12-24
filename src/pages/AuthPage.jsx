@@ -1,5 +1,5 @@
 import React, { useEffect, useMemo, useState } from 'react'
-import { InputField, NavigationBar } from '../components/ui'
+import { InputField } from '../components/ui'
 import { authRememberKey, supabase, supabaseConfigError } from '../services/supabase'
 
 const initialLogin = {
@@ -156,8 +156,6 @@ export function AuthPage({ onNavigateHome, onLoginSuccess }) {
   return (
     <div className="min-h-screen bg-linear-to-b from-slate-950 via-slate-950 to-amber-900 text-slate-50 flex items-center justify-center">
       <div className="mx-auto flex w-full max-w-5xl flex-col gap-8 px-4 py-10 sm:px-6 lg:px-8">
-        <NavigationBar onNavigateHome={onNavigateHome} />
-
         <div className="grid place-items-center gap-6">
           <section className="w-full max-w-xl rounded-3xl bg-slate-900/80 p-6 shadow-2xl shadow-black/40 ring-1 ring-white/5">
             <div className="flex flex-col gap-2">
