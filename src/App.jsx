@@ -253,7 +253,7 @@ function App() {
       return
     }
 
-// adicionar time à lista
+    // adicionar time à lista
     setTimes((current) => [savedTeam, ...current])
     navigate('/carrinho')
     setFormData(initialForm)
@@ -282,6 +282,19 @@ function App() {
     }
   }
 
+  const handleLogout = async () => {
+    if (supabase) {
+      try {
+        await supabase.auth.signOut()
+      } catch (error) {
+        console.error('Erro ao sair da conta', error)
+      }
+    }
+
+    setUser(null)
+    navigate('/acesso')
+  }
+
   // determinar qual página renderizar
   const isAdminRoute = route.startsWith('/admin')
   const isPaymentRoute = route.startsWith('/pagamento')
@@ -308,7 +321,7 @@ function App() {
     )
   }
 
- // renderizar páginas conforme a rota
+  // renderizar páginas conforme a rota
   if (isAuthRoute) {
     return (
       <AuthPage
@@ -318,7 +331,7 @@ function App() {
     )
   }
 
-// renderizar página de pagamento
+  // renderizar página de pagamento
   if (isPaymentRoute) {
     return (
       <PaymentPage
@@ -330,7 +343,7 @@ function App() {
     )
   }
 
-// renderizar página do carrinho
+  // renderizar página do carrinho
   if (isCartRoute) {
     return (
       <CartPage
@@ -343,7 +356,7 @@ function App() {
     )
   }
 
-// renderizar página admin
+  // renderizar página admin
   if (isAdminRoute) {
     return (
       <AdminPage
@@ -357,7 +370,8 @@ function App() {
       />
     )
   }
-// renderizar página inicial
+
+  // renderizar página inicial
   return (
     <HomePage
       formData={formData}
@@ -367,7 +381,7 @@ function App() {
       erroServidor={erroServidor}
       handleChange={handleChange}
       handleSubmit={handleSubmit}
-      onNavigateAuth={() => navigate('/acesso')}
+      onNavigateAuth={handleLogout}
       onNavigateCart={() => navigate('/carrinho')}
       onNavigatePayment={() => navigate('/pagamento')}
       onResetForm={() => {

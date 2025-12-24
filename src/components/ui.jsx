@@ -33,7 +33,7 @@ export function NavigationBar({
             onClick={onNavigateLogin}
             className="rounded-full border border-transparent px-3 py-2 font-semibold text-slate-200 transition hover:border-amber-400 hover:text-amber-100"
           >
-            Voltar ao login
+            Sair
           </button>
         )}
       </div>
