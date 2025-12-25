@@ -77,7 +77,9 @@ const validateCelular = (value) => {
 const parseIntegrantes = (value) => value.split(/[\n,]/).map((item) => item.trim()).filter(Boolean)
 
 // limitando cpf
-const cpfExists = (list, cpfDigits) => Boolean(cpfDigits) && list.some((time) => sanitizeDigits(time.cpf) === cpfDigits)
+const cpfExists = (list, cpfDigits, modalidade) =>
+  Boolean(cpfDigits)
+  && list.some((time) => sanitizeDigits(time.cpf) === cpfDigits && time.modalidade === modalidade)
 
 function App() {
   const normalizeRoute = (path) => (path.startsWith('/acessar') ? '/acesso' : path)
@@ -201,8 +203,10 @@ function App() {
       ...(!validateCPF(formData.cpf) ? ['CPF inválido'] : []),
       ...(!validateCelular(formData.celular) ? ['Número de celular inválido (use DDD e 9 dígitos)'] : []),
 
-      // Impede o mesmo CPF de cadastrar mais de um time
-      ...(cpfExists(times, cpfDigits) ? ['Este CPF já possui um time cadastrado.'] : []),
+      // Impede o mesmo CPF de cadastrar mais de um time na mesma modalidade
+      ...(cpfExists(times, cpfDigits, formData.modalidade)
+        ? ['Este CPF já possui um time cadastrado nesta modalidade.']
+        : []),
       ...(formData.modalidade === 'futebol' && integrantesList.length > 15
         ? ['Limite de 15 integrantes para futebol']
         : []),
@@ -221,7 +225,7 @@ function App() {
     const celularFormatado = formatCelular(formData.celular)
 
     try {
-      const cpfEmUso = await cpfAlreadyUsed(cpfFormatado, cpfDigits)
+      const cpfEmUso = await cpfAlreadyUsed(cpfFormatado, cpfDigits, formData.modalidade)
       if (cpfEmUso) {
         setErrors(['Este CPF já está sendo usado em outra conta.'])
         return
@@ -258,7 +262,7 @@ function App() {
     } catch (error) {
       console.error('Erro ao salvar time', error)
       if (error?.code === '23505') {
-        setErrors(['Este CPF já está cadastrado.'])
+        setErrors(['Este CPF já está cadastrado nesta modalidade.'])
         return
       }
       const message =

@@ -77,14 +77,18 @@ export async function saveTeam(team) {
   return data ? fromSupabaseTeam(data) : team
 }
 
-export async function cpfAlreadyUsed(cpf, cpfDigits = '') {
+export async function cpfAlreadyUsed(cpf, cpfDigits = '', modalidade = '') {
   if (!supabase) {
     throw new Error(supabaseConfigError)
   }
 
   const cpfValue = cpf?.trim()
   if (cpfValue) {
-    const { data, error } = await supabase.from('inscricoes').select('id').eq('cpf', cpfValue).limit(1).maybeSingle()
+    const baseQuery = supabase.from('inscricoes').select('id').eq('cpf', cpfValue)
+    const { data, error } = await (modalidade
+      ? baseQuery.eq('modalidade', modalidade)
+      : baseQuery
+    ).limit(1).maybeSingle()
 
     if (error) {
       throw error
@@ -99,7 +103,11 @@ export async function cpfAlreadyUsed(cpf, cpfDigits = '') {
     return false
   }
 
-  const { data, error } = await supabase.from('inscricoes').select('id').eq('cpf', cpfDigits).limit(1).maybeSingle()
+  const baseQuery = supabase.from('inscricoes').select('id').eq('cpf', cpfDigits)
+  const { data, error } = await (modalidade
+    ? baseQuery.eq('modalidade', modalidade)
+    : baseQuery
+  ).limit(1).maybeSingle()
 
   if (error) {
     throw error
@@ -107,7 +115,6 @@ export async function cpfAlreadyUsed(cpf, cpfDigits = '') {
 
   return Boolean(data?.id)
 }
-
 
 export async function removeTeam(id) {
   if (!supabase) {
