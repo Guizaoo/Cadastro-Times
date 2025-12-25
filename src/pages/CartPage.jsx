@@ -111,13 +111,13 @@ export function CartPage({
                   </div>
 
                   {/* AÇÕES */}
-                  <div className="flex flex-col items-end gap-3">
+                  <div className="flex flex-col items-stretch gap-3 sm:items-end">
                     <StatusBadge status={time.status} />
 
                     <button
                       type="button"
                       onClick={() => onNavigatePayment?.(time.id)}
-                      className="rounded-lg border border-emerald-500/50 px-4 py-2 text-xs font-semibold text-emerald-100 transition hover:bg-emerald-500/10"
+                      className="w-full rounded-lg border border-emerald-500/50 px-4 py-2 text-xs font-semibold text-emerald-100 transition hover:bg-emerald-500/10 sm:w-auto"
                     >
                       Ir para pagamento
                     </button>

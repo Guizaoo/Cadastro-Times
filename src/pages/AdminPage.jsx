@@ -74,8 +74,8 @@ export function AdminPage({ times, carregando, erroServidor, onDelete, onStatusC
               </button>
             </div>
 
-            <div className="overflow-hidden rounded-xl border border-slate-800 bg-slate-950/40 shadow-inner shadow-black/30">
-              <table className="w-full text-sm text-slate-200">
+            <div className="-mx-4 overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/40 shadow-inner shadow-black/30 sm:mx-0">
+              <table className=".min-w-[720px] w-full text-sm text-slate-200">
                 <thead className="bg-slate-900/80 text-xs uppercase tracking-wide text-slate-400">
                   <tr>
                     <th className="px-4 py-3 text-left">Equipe</th>

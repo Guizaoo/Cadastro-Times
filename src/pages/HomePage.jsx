@@ -1,7 +1,7 @@
-import React from 'react'
-import { InputField, NavigationBar } from '../components/ui'
+import React from "react";
+import { InputField, NavigationBar } from "../components/ui";
 
-import { sportOptions } from './homePageConfig'
+import { sportOptions } from "./homePageConfig";
 
 export function HomePage({
   formData,
@@ -29,21 +29,29 @@ export function HomePage({
 
         <header className="flex flex-col gap-5 rounded-3xl bg-slate-900/80 p-6 shadow-2xl shadow-black/40 ring-1 ring-white/5">
           <div className="flex flex-col gap-2">
-            <p className="text-xs uppercase tracking-[0.25em] text-amber-200">Copa João Guilherme</p>
-            <h1 className="text-3xl font-bold sm:text-4xl">Bem-vindos ao cadastro oficial da Copa</h1>
+            <p className="text-xs uppercase tracking-[0.25em] text-amber-200">
+              Copa João Guilherme
+            </p>
+            <h1 className="text-3xl font-bold sm:text-4xl">
+              Bem-vindos ao cadastro oficial da Copa
+            </h1>
             <p className="text-sm text-slate-200">
-              Deixe tudo pronto para receber as torcidas: escolha a modalidade, confirme os dados básicos e salve. Tudo foi
-              pensado para quem chega se sentir acolhido.
+              Deixe tudo pronto para receber as torcidas: escolha a modalidade,
+              confirme os dados básicos e salve. Tudo foi pensado para quem
+              chega se sentir acolhido.
             </p>
             <p className="text-sm text-amber-100">
-              O formulário pede somente o essencial (nome, equipe, integrantes, CPF e celular) para que cada clube se sinta
-              convidado desde o primeiro clique.
+              O formulário pede somente o essencial (nome, equipe, integrantes,
+              CPF e celular) para que cada clube se sinta convidado desde o
+              primeiro clique.
             </p>
           </div>
         </header>
 
         {erroServidor && (
-          <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">{erroServidor}</div>
+          <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
+            {erroServidor}
+          </div>
         )}
 
         <section className="grid grid-cols-1 gap-6">
@@ -51,14 +59,21 @@ export function HomePage({
             <div className="rounded-2xl bg-slate-900/70 p-5 shadow-lg shadow-amber-900/30 ring-1 ring-white/5">
               <div className="flex flex-wrap items-center justify-between gap-3">
                 <div>
-                  <p className="text-xs uppercase tracking-[0.25em] text-amber-200">Modalidade</p>
-                  <h2 className="text-lg font-semibold text-slate-50">Escolha antes de cadastrar</h2>
-                  <p className="text-sm text-slate-300">Selecione o esporte antes de preencher os dados obrigatórios.</p>
+                  <p className="text-xs uppercase tracking-[0.25em] text-amber-200">
+                    Modalidade
+                  </p>
+                  <h2 className="text-lg font-semibold text-slate-50">
+                    Escolha antes de cadastrar
+                  </h2>
+                  <p className="text-sm text-slate-300">
+                    Selecione o esporte antes de preencher os dados
+                    obrigatórios.
+                  </p>
                 </div>
               </div>
               <div className="mt-3 grid grid-cols-1 gap-3 sm:grid-cols-2">
                 {Object.entries(sportOptions).map(([key, option]) => {
-                  const isActive = formData.modalidade === key
+                  const isActive = formData.modalidade === key;
                   return (
                     <button
                       key={key}
@@ -67,22 +82,25 @@ export function HomePage({
                         setFormData((current) => ({
                           ...current,
                           modalidade: key,
-                          categoriaVolei: key === 'volei' ? current.categoriaVolei : '',
+                          categoriaVolei:
+                            key === "volei" ? current.categoriaVolei : "",
                         }))
                       }
                       className={`rounded-xl border px-4 py-3 text-left transition focus:outline-none focus:ring-2 focus:ring-amber-400/70 ${
                         isActive
-                          ? 'border-amber-400/70 bg-amber-500/10 text-amber-50 shadow-amber-500/20'
-                          : 'border-slate-700 bg-slate-900 text-slate-200 hover:border-amber-400/40'
+                          ? "border-amber-400/70 bg-amber-500/10 text-amber-50 shadow-amber-500/20"
+                          : "border-slate-700 bg-slate-900 text-slate-200 hover:border-amber-400/40"
                       }`}
                     >
                       <p className="text-sm font-semibold">{option.label}</p>
                       <p className="text-xs text-slate-300">{option.helper}</p>
                     </button>
-                  )
+                  );
                 })}
               </div>
-              <p className="mt-2 text-xs text-slate-400">Tudo pronto para receber o time escolhido.</p>
+              <p className="mt-2 text-xs text-slate-400">
+                Tudo pronto para receber o time escolhido.
+              </p>
             </div>
 
             <form
@@ -126,7 +144,10 @@ export function HomePage({
               </div>
 
               <div className="flex flex-col gap-2">
-                <label className="text-sm font-semibold text-slate-200" htmlFor="integrantes">
+                <label
+                  className="text-sm font-semibold text-slate-200"
+                  htmlFor="integrantes"
+                >
                   Nome dos integrantes*
                 </label>
                 <textarea
@@ -134,19 +155,22 @@ export function HomePage({
                   name="integrantes"
                   value={formData.integrantes}
                   onChange={handleChange}
-                  className=".min-h-[72px] w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-500/40"
+                  className=".min-h-[96px] w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-3 text-sm outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-500/40"
                   placeholder="João, Gabriel, Pedro, Augusto..."
                 />
                 <p className="text-xs text-slate-400">
-                  {formData.modalidade === 'volei'
-                    ? 'Apenas duplas: informe exatamente 2 nomes, separados por vírgula ou quebra de linha.'
-                    : 'Limite de 15 pessoas: separe os nomes por vírgula ou quebra de linha.'}
+                  {formData.modalidade === "volei"
+                    ? "Apenas duplas: informe exatamente 2 nomes, separados por vírgula ou quebra de linha."
+                    : "Limite de 15 pessoas: separe os nomes por vírgula ou quebra de linha."}
                 </p>
               </div>
 
-              {formData.modalidade === 'volei' && (
+              {formData.modalidade === "volei" && (
                 <div className="flex flex-col gap-2">
-                  <label className="text-sm font-semibold text-slate-200" htmlFor="categoriaVolei">
+                  <label
+                    className="text-sm font-semibold text-slate-200"
+                    htmlFor="categoriaVolei"
+                  >
                     Categoria do vôlei*
                   </label>
                   <select
@@ -170,7 +194,7 @@ export function HomePage({
 
               {errors.length > 0 && (
                 <div className="rounded-xl border border-red-500/40 bg-red-500/10 px-4 py-3 text-sm text-red-100">
-                  Revise os itens abaixo antes de enviar: {errors.join(' • ')}.
+                  Revise os itens abaixo antes de enviar: {errors.join(" • ")}.
                 </div>
               )}
 
@@ -188,12 +212,14 @@ export function HomePage({
                 >
                   Limpar tudo
                 </button>
-                <p className="text-xs text-slate-400">Campos marcados com * são obrigatórios.</p>
+                <p className="text-xs text-slate-400">
+                  Campos marcados com * são obrigatórios.
+                </p>
               </div>
             </form>
           </div>
         </section>
       </div>
     </div>
-  )
+  );
 }

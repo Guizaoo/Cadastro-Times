@@ -6,13 +6,13 @@ export function NavigationBar({
 }) {
   // Navegação simples para páginas internas (carrinho, admin, pagamento)
   return (
-    <nav className="flex flex-wrap items-center justify-between gap-3 rounded-2xl border border-slate-800/70 bg-slate-900/60 px-4 py-3 text-xs uppercase tracking-[0.2em] text-slate-200 shadow-lg shadow-black/30">
-      <div className="flex flex-1 items-center justify-start">
+    <nav className="flex flex-col gap-3 rounded-2xl border border-slate-800/70 bg-slate-900/60 px-4 py-3 text-[11px] uppercase tracking-[0.18em] text-slate-200 shadow-lg shadow-black/30 sm:flex-row sm:items-center sm:justify-between sm:text-xs sm:tracking-[0.2em]">
+      <div className="flex w-full flex-wrap items-center justify-center gap-2 sm:w-auto sm:flex-1 sm:justify-start">
         {onNavigateBackToRegister && (
           <button
             type="button"
             onClick={onNavigateBackToRegister}
-            className="inline-flex items-center gap-2 rounded-full border border-transparent px-3 py-2 font-semibold text-slate-200 transition hover:border-amber-400 hover:text-amber-100"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-transparent px-3 py-2 font-semibold text-slate-200 transition hover:border-amber-400 hover:text-amber-100 sm:w-auto"
           >
             <svg
               aria-hidden="true"
@@ -33,27 +33,27 @@ export function NavigationBar({
           <button
             type="button"
             onClick={onNavigateLogin}
-            className="rounded-full border border-transparent px-3 py-2 font-semibold text-slate-200 transition hover:border-amber-400 hover:text-amber-100"
+            className="w-full rounded-full border border-transparent px-3 py-2 font-semibold text-slate-200 transition hover:border-amber-400 hover:text-amber-100 sm:w-auto"
           >
             Sair
           </button>
         )}
       </div>
-      <div className="flex flex-1 items-center justify-center">
+      <div className="flex w-full items-center justify-center sm:w-auto sm:flex-1">
         {userDisplayName && (
-          <div className="flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-500/10 px-4 py-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-amber-100 shadow-inner shadow-black/30">
+          <div className="flex items-center gap-2 rounded-full border border-amber-400/30 bg-amber-500/10 px-4 py-2 text-[10px] font-semibold uppercase tracking-[0.16em] text-amber-100 shadow-inner shadow-black/30 sm:text-[11px] sm:tracking-[0.18em]">
             <span className="text-amber-200">Olá</span>
             <span className="text-slate-100">•</span>
             <span className="text-amber-100">{userDisplayName}</span>
           </div>
         )}
-        </div>
-      <div className="flex flex-1 items-center justify-end gap-3">
+      </div>
+      <div className="flex w-full flex-wrap items-center justify-center gap-2 sm:w-auto sm:flex-1 sm:justify-end sm:gap-3">
         {onNavigateCart && (
           <button
             type="button"
             onClick={onNavigateCart}
-            className="inline-flex items-center gap-2 rounded-full border border-transparent px-3 py-2 font-semibold text-slate-200 transition hover:border-amber-400 hover:text-amber-100"
+            className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-transparent px-3 py-2 font-semibold text-slate-200 transition hover:border-amber-400 hover:text-amber-100 sm:w-auto"
           >
             <svg
               aria-hidden="true"

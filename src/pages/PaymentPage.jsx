@@ -152,22 +152,24 @@ export function PaymentPage({
                 Revise os dados do time, copie a chave Pix ou escaneie o QR Code
                 para concluir o pagamento.
               </p>
-              {onNavigateHome && (
-                <button
-                  onClick={onNavigateHome}
-                  className="mt-4 inline-flex items-center gap-2 rounded-full border border-amber-300/50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-amber-100 transition hover:border-amber-200 hover:text-amber-50"
-                >
-                  Voltar para cadastro
-                </button>
-              )}
-              {onNavigateCart && (
-                <button
-                  onClick={onNavigateCart}
-                  className="mt-2 inline-flex items-center gap-2 rounded-full border border-slate-700 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-100 transition hover:border-amber-200 hover:text-amber-50"
-                >
-                  Voltar para o carrinho
-                </button>
-              )}
+              <div className="mt-4 flex flex-col gap-2 sm:flex-row sm:flex-wrap">
+                {onNavigateHome && (
+                  <button
+                    onClick={onNavigateHome}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-amber-300/50 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-amber-100 transition hover:border-amber-200 hover:text-amber-50 sm:w-auto"
+                  >
+                    Voltar para cadastro
+                  </button>
+                )}
+                {onNavigateCart && (
+                  <button
+                    onClick={onNavigateCart}
+                    className="inline-flex w-full items-center justify-center gap-2 rounded-full border border-slate-700 px-4 py-2 text-xs font-semibold uppercase tracking-wide text-slate-100 transition hover:border-amber-200 hover:text-amber-50 sm:w-auto"
+                  >
+                    Voltar para o carrinho
+                  </button>
+                )}
+              </div>
             </div>
             <StatusBadge status={team.status} />
           </div>
