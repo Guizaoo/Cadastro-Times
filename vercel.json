@@ -1,12 +1,8 @@
 {
   "rewrites": [
-    { "source": "/acessar", "destination": "/" },
-    { "source": "/acessar/(.*)", "destination": "/" },
-    { "source": "/acesso", "destination": "/" },
-    { "source": "/acesso/(.*)", "destination": "/" },
-    { "source": "/admin", "destination": "/" },
-    { "source": "/admin/(.*)", "destination": "/" },
-    { "source": "/pagamento", "destination": "/" },
-    { "source": "/pagamento/(.*)", "destination": "/" }
+    {
+      "source": "/(.*)",
+      "destination": "/"
+    }
   ]
 }
