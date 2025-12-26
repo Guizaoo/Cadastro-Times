@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
+import { sportOptions } from './homePageConfig'
 
 // ==============================
 // Constantes auxiliares
@@ -46,6 +47,10 @@ export function PaymentPage({
   )
 
   const pixAmount = useMemo(() => DEFAULT_PIX_AMOUNT, [])
+  const modalidadeLabel = useMemo(() => {
+    if (!team?.modalidade) return ''
+    return sportOptions[team.modalidade]?.label ?? team.modalidade
+  }, [team])
 
   // abrir WhatsApp
   const openWhatsapp = () => {
@@ -55,7 +60,11 @@ export function PaymentPage({
     const message = encodeURIComponent(
       `Olá! Realizei o pagamento do PIX no valor de ${formatCurrency(
         pixAmount
-      )} referente ao time "${team?.nomeEquipe ?? ''}".`
+      )} referente ao time "${team?.nomeEquipe ?? ''}" (${modalidadeLabel}${
+        team?.modalidade === 'volei' && team?.categoriaVolei
+          ? ` • ${team.categoriaVolei}`
+          : ''
+      }).`
     )
 
     window.open(
@@ -87,7 +96,7 @@ export function PaymentPage({
         <div className="flex items-center justify-between">
           <button
             onClick={onNavigateHome}
-            className="text-sm underline opacity-80 hover:opacity-100"
+            className="text-sm underline hover:opacity-100"
           >
             Voltar
           </button>
@@ -101,6 +110,15 @@ export function PaymentPage({
           </p>
           <p>
             <strong>Responsável:</strong> {team.nome}
+          </p>
+          <p>
+            <strong>CPF:</strong> {team.cpf}
+          </p>
+          <p>
+            <strong>Modalidade:</strong> {modalidadeLabel}
+            {team.modalidade === 'volei' && team.categoriaVolei
+              ? ` • ${team.categoriaVolei}`
+              : ''}
           </p>
           <p>
             <strong>Valor:</strong>{' '}
