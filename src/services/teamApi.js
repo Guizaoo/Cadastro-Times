@@ -64,17 +64,16 @@ export async function saveTeam(team) {
     throw new Error(supabaseConfigError)
   }
 
-  const { data, error } = await supabase
-    .from('inscricoes')
-    .insert([toSupabaseTeam(team)])
-    .select('*')
-    .single()
+   const { error } = await supabase.from('inscricoes').insert([toSupabaseTeam(team)])
 
   if (error) {
+    if (error.code === '23505') {
+      throw new Error('Este CPF já possui um time cadastrado nesta modalidade.')
+    }
     throw error
   }
 
-  return data ? fromSupabaseTeam(data) : team
+  return team
 }
 
 export async function cpfAlreadyUsed(cpf, cpfDigits = '', modalidade = '') {
