@@ -68,23 +68,25 @@ export function PaymentPage({
 
   // abrir WhatsApp
   const openWhatsapp = () => {
-    if (hasOpenedWhatsapp.current) return
-    hasOpenedWhatsapp.current = true
+  if (hasOpenedWhatsapp.current) return
+  hasOpenedWhatsapp.current = true
 
-    const messageParts = [
-      `Olá! Realizei o pagamento do PIX no valor de ${formatCurrency(
-        pixAmount
-      )} referente ao time "${team?.nomeEquipe ?? ''}".`,
-      ...(team?.cpf ? [`CPF: ${team.cpf}`] : []),
-    ]
+  const messageParts = [
+    `Olá! Realizei o pagamento do PIX no valor de ${formatCurrency(
+      pixAmount
+    )} referente ao time "${team?.nomeEquipe ?? ''}".`,
+    ...(team?.nome ? [`Responsável: ${team.nome}`] : []),
+    ...(team?.cpf ? [`CPF: ${team.cpf}`] : []),
+  ]
 
-    const message = encodeURIComponent(messageParts.join('\n'))
+  const message = encodeURIComponent(messageParts.join('\n'))
 
-    window.open(
-      `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`,
-      '_blank'
-    )
-  }
+  window.open(
+    `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`,
+    '_blank'
+  )
+}
+
 
   if (!team) {
     return (
