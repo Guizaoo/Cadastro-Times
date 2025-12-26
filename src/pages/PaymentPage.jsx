@@ -1,5 +1,4 @@
 import { useMemo, useRef, useState } from 'react'
-import { sportOptions } from './homePageConfig'
 
 // ==============================
 // Constantes auxiliares
@@ -17,6 +16,24 @@ const formatCurrency = (value) =>
     style: 'currency',
     currency: 'BRL',
   }).format(value)
+
+const formatModalidadeLabel = (team) => {
+  if (!team?.modalidade) return ''
+
+  const baseLabel =
+    team.modalidade === 'volei'
+      ? 'Vôlei'
+      : team.modalidade === 'futebol'
+        ? 'Futebol'
+        : team.modalidade
+
+  const categoriaLabel =
+    team.modalidade === 'volei' && team.categoriaVolei
+      ? ` • ${team.categoriaVolei}`
+      : ''
+
+  return `${baseLabel}${categoriaLabel}`
+}
 
 // ==============================
 // Componente
@@ -47,25 +64,21 @@ export function PaymentPage({
   )
 
   const pixAmount = useMemo(() => DEFAULT_PIX_AMOUNT, [])
-  const modalidadeLabel = useMemo(() => {
-    if (!team?.modalidade) return ''
-    return sportOptions[team.modalidade]?.label ?? team.modalidade
-  }, [team])
+  const modalidadeLabel = useMemo(() => formatModalidadeLabel(team), [team])
 
   // abrir WhatsApp
   const openWhatsapp = () => {
     if (hasOpenedWhatsapp.current) return
     hasOpenedWhatsapp.current = true
 
-    const message = encodeURIComponent(
+    const messageParts = [
       `Olá! Realizei o pagamento do PIX no valor de ${formatCurrency(
         pixAmount
-      )} referente ao time "${team?.nomeEquipe ?? ''}" (${modalidadeLabel}${
-        team?.modalidade === 'volei' && team?.categoriaVolei
-          ? ` • ${team.categoriaVolei}`
-          : ''
-      }).`
-    )
+      )} referente ao time "${team?.nomeEquipe ?? ''}".`,
+      ...(team?.cpf ? [`CPF: ${team.cpf}`] : []),
+    ]
+
+    const message = encodeURIComponent(messageParts.join('\n'))
 
     window.open(
       `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`,
@@ -96,7 +109,7 @@ export function PaymentPage({
         <div className="flex items-center justify-between">
           <button
             onClick={onNavigateHome}
-            className="text-sm underline hover:opacity-100"
+            className="text-sm underline opacity-80 hover:opacity-100"
           >
             Voltar
           </button>
@@ -111,15 +124,16 @@ export function PaymentPage({
           <p>
             <strong>Responsável:</strong> {team.nome}
           </p>
-          <p>
-            <strong>CPF:</strong> {team.cpf}
-          </p>
-          <p>
-            <strong>Modalidade:</strong> {modalidadeLabel}
-            {team.modalidade === 'volei' && team.categoriaVolei
-              ? ` • ${team.categoriaVolei}`
-              : ''}
-          </p>
+          {modalidadeLabel && (
+            <p>
+              <strong>Modalidade:</strong> {modalidadeLabel}
+            </p>
+          )}
+          {team.cpf && (
+            <p>
+              <strong>CPF:</strong> {team.cpf}
+            </p>
+          )}
           <p>
             <strong>Valor:</strong>{' '}
             <span className="text-emerald-400 font-semibold">
