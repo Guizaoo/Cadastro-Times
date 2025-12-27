@@ -34,6 +34,8 @@ function App() {
   // Auth (Supabase)
   const [authReady, setAuthReady] = useState(false)
   const [user, setUser] = useState(null)
+  const [isAdmin, setIsAdmin] = useState(false)
+  const [adminReady, setAdminReady] = useState(false)
 
   // Navegação memoizada (evita warning + comportamento consistente)
   const navigate = useCallback(
@@ -115,12 +117,18 @@ function App() {
     }
 
     supabase.auth.getSession().then(({ data, error }) => {
-      if (!error) setUser(data.session?.user ?? null)
+      if (!error) {
+        setUser(data.session?.user ?? null)
+        setIsAdmin(false)
+        setAdminReady(false)
+      }
       setAuthReady(true)
     })
 
     const { data: listener } = supabase.auth.onAuthStateChange((_event, session) => {
       setUser(session?.user ?? null)
+      setIsAdmin(false)
+      setAdminReady(false)
       setAuthReady(true)
     })
 
@@ -128,6 +136,57 @@ function App() {
       listener?.subscription?.unsubscribe()
     }
   }, [])
+
+  // ==============================
+  // 3.1) Verificar se o usuário é admin
+  // ==============================
+  useEffect(() => {
+    if (!authReady) return
+
+    if (!supabase || !user) {
+      setIsAdmin(false)
+      setAdminReady(true)
+      return
+    }
+
+    let active = true
+    setAdminReady(false)
+
+    const adminEmail = user.email?.trim().toLowerCase()
+    if (!adminEmail) {
+      setIsAdmin(false)
+      setAdminReady(true)
+      return () => {
+        active = false
+      }
+    }
+
+    supabase
+      .from('admin_emails')
+      .select('email')
+      .ilike('email', adminEmail)
+      .maybeSingle()
+      .then(({ data, error }) => {
+        if (!active) return
+        if (error) {
+          console.error('Erro ao verificar admin', error)
+          setIsAdmin(false)
+        } else {
+          setIsAdmin(Boolean(data?.email))
+        }
+        setAdminReady(true)
+      })
+      .catch((error) => {
+        if (!active) return
+        console.error('Erro ao verificar admin', error)
+        setIsAdmin(false)
+        setAdminReady(true)
+      })
+
+    return () => {
+      active = false
+    }
+  }, [authReady, user])
 
   // ==============================
   // Rotas derivadas
@@ -329,6 +388,41 @@ function App() {
   }
 
   if (isAdminRoute) {
+    if (!adminReady) {
+      return (
+        <div className="min-h-screen flex items-center justify-center p-6 text-center">
+          <div>
+            <div className="text-lg font-semibold">Carregando...</div>
+            <div className="text-sm opacity-70">Verificando permissões de acesso.</div>
+          </div>
+        </div>
+      )
+    }
+
+    if (!isAdmin) {
+      return (
+        <div className="min-h-screen bg-slate-950 text-slate-50">
+          <div className="mx-auto flex min-h-screen max-w-4xl flex-col items-center justify-center px-6 text-center">
+            <div className="rounded-3xl border border-white/10 bg-slate-900/80 p-8 shadow-2xl shadow-black/40 ring-1 ring-white/5">
+              <p className="text-xs uppercase tracking-[0.25em] text-amber-200">/admin</p>
+              <h1 className="mt-3 text-2xl font-semibold">Você não tem acesso a esta página</h1>
+              <p className="mt-2 text-sm text-slate-300">
+                Este painel é restrito apenas a usuários autorizados. Se precisar de acesso,
+                solicite liberação ao administrador.
+              </p>
+              <button
+                type="button"
+                onClick={() => navigate('/')}
+                className="mt-6 rounded-lg border border-amber-400/60 px-4 py-2 text-xs font-semibold text-amber-100 transition hover:bg-amber-400/10"
+              >
+                Voltar para o site
+              </button>
+            </div>
+          </div>
+        </div>
+      )
+    }
+
     return (
       <AdminPage
         times={times}
