@@ -1,4 +1,5 @@
 import { supabase, supabaseConfigError } from './supabase'
+import { buildProtectedCpf } from '../utils/cpf'
 
 const VALID_STATUSES = ['pendente', 'pago', 'reprovado']
 const LEGACY_STATUS_MAP = {
@@ -82,8 +83,11 @@ export async function cpfAlreadyUsed(cpf, cpfDigits = '', modalidade = '') {
   }
 
   const cpfValue = cpf?.trim()
-  if (cpfValue) {
-    const baseQuery = supabase.from('inscricoes').select('id').eq('cpf', cpfValue)
+  const normalizedDigits = cpfDigits || sanitizeDigits(cpfValue)
+  const protectedCpf = cpfValue ? await buildProtectedCpf(cpfValue) : ''
+
+  if (protectedCpf) {
+    const baseQuery = supabase.from('inscricoes').select('id').eq('cpf', protectedCpf)
     const { data, error } = await (modalidade
       ? baseQuery.eq('modalidade', modalidade)
       : baseQuery
@@ -98,11 +102,11 @@ export async function cpfAlreadyUsed(cpf, cpfDigits = '', modalidade = '') {
     }
   }
 
-  if (!cpfDigits || cpfDigits === cpfValue) {
+  if (!normalizedDigits || normalizedDigits === cpfValue) {
     return false
   }
 
-  const baseQuery = supabase.from('inscricoes').select('id').eq('cpf', cpfDigits)
+  const baseQuery = supabase.from('inscricoes').select('id').eq('cpf', normalizedDigits)
   const { data, error } = await (modalidade
     ? baseQuery.eq('modalidade', modalidade)
     : baseQuery

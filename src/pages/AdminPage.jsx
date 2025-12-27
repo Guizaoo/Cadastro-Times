@@ -1,5 +1,7 @@
 import React, { useMemo } from 'react'
 import { NavigationBar, SmallStat, StatusBadge } from '../components/ui'
+import { formatCpfForDisplay } from '../utils/cpf'
+
 
 const formatCreatedAt = (dateString) =>
   new Date(dateString).toLocaleDateString('pt-BR', {
@@ -92,7 +94,7 @@ export function AdminPage({ times, carregando, erroServidor, onDelete, onStatusC
                     <tr key={time.id} className="border-t border-slate-800/80">
                       <td className="px-4 py-3">
                         <div className="font-semibold text-slate-50">{time.nomeEquipe}</div>
-                        <div className="text-xs text-slate-400">CPF {time.cpf}</div>
+                        <div className="text-xs text-slate-400">CPF {formatCpfForDisplay(time.cpf)}</div>
                       </td>
                       <td className="px-4 py-3 capitalize">
                         {time.modalidade}

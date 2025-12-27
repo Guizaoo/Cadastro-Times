@@ -7,75 +7,12 @@ import { initialForm } from './pages/homePageConfig'
 import { PaymentPage } from './pages/PaymentPage'
 import { supabase } from './services/supabase'
 import { fetchTeams, saveTeam } from './services/teamApi'
-
-// ==============================
-// Helpers (format/validate)
-// ==============================
-const normalizeText = (value) => value.trim()
-const sanitizeDigits = (value) => value.replace(/\D+/g, '')
-
-const formatCPF = (value) => {
-  const digits = sanitizeDigits(value)
-  if (digits.length !== 11) return normalizeText(value)
-  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`
-}
-
-const formatCelular = (value) => {
-  const digits = sanitizeDigits(value)
-  if (digits.length < 10) return normalizeText(value)
-
-  const ddd = digits.slice(0, 2)
-  const number = digits.slice(2)
-  const hasNineDigits = number.length === 9
-
-  const partA = number.slice(0, hasNineDigits ? 5 : 4)
-  const partB = number.slice(hasNineDigits ? 5 : 4)
-
-  return `(${ddd}) ${partA}-${partB}`
-}
-
-const validateCPF = (value) => {
-  const digits = sanitizeDigits(value)
-  if (digits.length !== 11) return false
-
-  const invalids = [
-    '00000000000',
-    '11111111111',
-    '22222222222',
-    '33333333333',
-    '44444444444',
-    '55555555555',
-    '66666666666',
-    '77777777777',
-    '88888888888',
-    '99999999999',
-  ]
-  if (invalids.includes(digits)) return false
-
-  const calcCheckDigit = (base, factor) => {
-    const sum = base.split('').reduce((acc, curr) => acc + Number(curr) * factor--, 0)
-    const remainder = (sum * 10) % 11
-    return remainder === 10 ? 0 : remainder
-  }
-
-  const first = calcCheckDigit(digits.slice(0, 9), 10)
-  const second = calcCheckDigit(digits.slice(0, 10), 11)
-
-  return String(first) === digits[9] && String(second) === digits[10]
-}
-
-const validateCelular = (value) => {
-  const digits = sanitizeDigits(value)
-  return digits.length >= 10 && digits.length <= 11
-}
-
-const parseIntegrantes = (value) =>
-  value.split(/[\n,]/).map((item) => item.trim()).filter(Boolean)
-
-// Impede o mesmo CPF de cadastrar mais de um time na mesma modalidade (na lista local)
-const cpfExists = (list, cpfDigits, modalidade) =>
-  Boolean(cpfDigits) &&
-  list.some((time) => sanitizeDigits(time.cpf) === cpfDigits && time.modalidade === modalidade)
+import {
+  parseIntegrantesList,
+  sanitizeDigits,
+  validateCPF,
+  validateCelular,
+} from './utils/cpf'
 
 // ==============================
 // App
@@ -247,7 +184,7 @@ function App() {
     setErroServidor('')
     setErrors([])
 
-    const integrantesList = parseIntegrantes(formData.integrantes)
+    const integrantesList = parseIntegrantesList(formData.integrantes)
     const cpfDigits = sanitizeDigits(formData.cpf)
 
     // Validações básicas
@@ -261,7 +198,7 @@ function App() {
         ? ['Categoria do vôlei é obrigatória']
         : []),
 
-      ...(!validateCPF(formData.cpf) ? ['CPF inválido'] : []),
+      ...(!isCPFValid(formData.cpf) ? ['CPF inválido'] : []),
       ...(!validateCelular(formData.celular) ? ['Número de celular inválido'] : []),
 
       ...(cpfExists(times, cpfDigits, formData.modalidade)

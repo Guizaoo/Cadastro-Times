@@ -1,4 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
+import { formatCpfForDisplay } from '../utils/cpf'
 
 // ==============================
 // Constantes auxiliares
@@ -76,7 +77,7 @@ export function PaymentPage({
       pixAmount
     )} referente ao time "${team?.nomeEquipe ?? ''}".`,
     ...(team?.nome ? [`Responsável: ${team.nome}`] : []),
-    ...(team?.cpf ? [`CPF: ${team.cpf}`] : []),
+    ...(team?.cpf ? [`CPF: ${formatCpfForDisplay(team.cpf)}`] : []),
   ]
 
   const message = encodeURIComponent(messageParts.join('\n'))
@@ -133,7 +134,7 @@ export function PaymentPage({
           )}
           {team.cpf && (
             <p>
-              <strong>CPF:</strong> {team.cpf}
+              <strong>CPF:</strong> {formatCpfForDisplay(team.cpf)}
             </p>
           )}
           <p>

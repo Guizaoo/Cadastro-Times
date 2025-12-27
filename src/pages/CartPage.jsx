@@ -1,5 +1,6 @@
 import React, { useMemo } from 'react'
 import { NavigationBar, StatusBadge } from '../components/ui'
+import { formatCpfForDisplay } from '../utils/cpf'
 
 const formatCreatedAt = (dateString) =>
   new Date(dateString).toLocaleDateString('pt-BR', {
@@ -95,7 +96,7 @@ export function CartPage({
                     </h2>
 
                     <div className="text-sm text-slate-300">
-                      CPF {time.cpf}
+                      CPF {formatCpfForDisplay(time.cpf)}
                     </div>
 
                     <div className="text-sm text-slate-400">
