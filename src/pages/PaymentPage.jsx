@@ -76,6 +76,7 @@ export function PaymentPage({
     `Olá! Realizei o pagamento do PIX no valor de ${formatCurrency(
       pixAmount
     )} referente ao time "${team?.nomeEquipe ?? ''}".`,
+    ...(modalidadeLabel ? [`Modalidade: ${modalidadeLabel}`] : []),
     ...(team?.nome ? [`Responsável: ${team.nome}`] : []),
     ...(team?.cpf ? [`CPF: ${formatCpfForDisplay(team.cpf)}`] : []),
   ]
