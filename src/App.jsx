@@ -6,8 +6,12 @@ import { HomePage } from './pages/HomePage'
 import { initialForm } from './pages/homePageConfig'
 import { PaymentPage } from './pages/PaymentPage'
 import { supabase } from './services/supabase'
-import { fetchTeams, saveTeam } from './services/teamApi'
+import { cpfAlreadyUsed, fetchTeams, saveTeam } from './services/teamApi'
 import {
+  cpfExists,
+  formatCelular,
+  formatCPF,
+  normalizeText,
   parseIntegrantesList,
   sanitizeDigits,
   validateCPF,
@@ -248,12 +252,28 @@ function App() {
     setFormData((current) => ({ ...current, [name]: value }))
   }
 
+  const cpfExists = (teams, cpfDigits, modalidade) => {
+    if (!cpfDigits) return false
+
+    return teams.some((team) => {
+      if (modalidade && team.modalidade !== modalidade) return false
+      return sanitizeDigits(team.cpf || '') === cpfDigits
+    })
+  }
+
+
   const handleSubmit = async (event) => {
     event.preventDefault()
 
     // Reset de mensagens anteriores
     setErroServidor('')
     setErrors([])
+
+ if (!user?.id) {
+      setErroServidor('Faça login para salvar o cadastro.')
+      return
+    }
+
 
     const integrantesList = parseIntegrantesList(formData.integrantes)
     const cpfDigits = sanitizeDigits(formData.cpf)
@@ -269,7 +289,7 @@ function App() {
         ? ['Categoria do vôlei é obrigatória']
         : []),
 
-      ...(!isCPFValid(formData.cpf) ? ['CPF inválido'] : []),
+      ...(!validateCPF(formData.cpf) ? ['CPF inválido'] : []),
       ...(!validateCelular(formData.celular) ? ['Número de celular inválido'] : []),
 
       ...(cpfExists(times, cpfDigits, formData.modalidade)

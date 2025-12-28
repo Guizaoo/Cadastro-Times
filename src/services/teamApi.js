@@ -1,5 +1,5 @@
 import { supabase, supabaseConfigError } from './supabase'
-import { buildProtectedCpf } from '../utils/cpf'
+import { buildProtectedCpf, sanitizeDigits } from '../utils/cpf'
 
 const VALID_STATUSES = ['pendente', 'pago', 'reprovado']
 const LEGACY_STATUS_MAP = {

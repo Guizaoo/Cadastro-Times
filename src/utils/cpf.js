@@ -12,7 +12,10 @@ export const formatCpfForDisplay = (cpf) => {
   const digits = sanitizeDigits(cpf)
   if (digits.length !== 11) return cpf
 
-  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`
+  return value
+    .split(/[\n,]+/)
+    .map((item) => item.trim())
+    .filter(Boolean)
 }
 
 export const parseIntegrantesList = (value) => {
@@ -51,4 +54,30 @@ export const validateCPF = (cpf) => {
 export const validateCelular = (celular) => {
   const digits = sanitizeDigits(celular)
   return digits.length === 11
+}
+
+export const formatCPF = (cpf) => {
+  const digits = sanitizeDigits(cpf)
+  if (digits.length !== 11) return cpf?.trim?.() ?? cpf
+
+  return `${digits.slice(0, 3)}.${digits.slice(3, 6)}.${digits.slice(6, 9)}-${digits.slice(9)}`
+}
+
+export const formatCelular = (celular) => {
+  const digits = sanitizeDigits(celular)
+  if (digits.length !== 11) return celular?.trim?.() ?? celular
+
+  return `(${digits.slice(0, 2)}) ${digits.slice(2, 7)}-${digits.slice(7)}`
+}
+
+export const normalizeText = (value) =>
+  value?.trim?.().replace(/\s+/g, ' ') ?? value
+
+export const cpfExists = (times, cpfDigits, modalidade) => {
+  if (!cpfDigits) return false
+
+  return times.some((time) => {
+    if (modalidade && time.modalidade !== modalidade) return false
+    return sanitizeDigits(time.cpf || '') === cpfDigits
+  })
 }
