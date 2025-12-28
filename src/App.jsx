@@ -74,8 +74,20 @@ function App() {
   // ==============================
   useEffect(() => {
     const carregarTimes = async () => {
+      if (!authReady) return
+
+      if (!user) {
+        setTimes([])
+        setCarregando(false)
+        return
+      }
+
       try {
-        const existentes = await fetchTeams()
+        setCarregando(true)
+        const existentes = await fetchTeams({
+          userId: user.id,
+          includeAll: isAdmin,
+        })
         setTimes(existentes)
       } catch (error) {
         console.error('Erro ao buscar times', error)
@@ -90,7 +102,7 @@ function App() {
     }
 
     carregarTimes()
-  }, [])
+  }, [authReady, user, isAdmin])
 
   // ==============================
   // 2) Ouvir back/forward do navegador
@@ -290,6 +302,7 @@ function App() {
       status: 'pendente',
       id: crypto.randomUUID(),
       criadoEm: new Date().toISOString(),
+      userId: user?.id ?? '',
     }
 
     try {

@@ -27,6 +27,7 @@ const toSupabaseTeam = (team) => ({
   categoria_volei: team.categoriaVolei,
   status: team.status,
   created_at: team.criadoEm,
+  user_id: team.userId ?? null,
 })
 
 const fromSupabaseTeam = (team) =>
@@ -41,17 +42,21 @@ const fromSupabaseTeam = (team) =>
     categoriaVolei: team.categoria_volei ?? team.categoriaVolei ?? '',
     status: team.status ?? 'pendente',
     criadoEm: team.created_at ?? team.criado_em ?? team.criadoEm ?? '',
+    userId: team.user_id ?? team.userId ?? '',
   })
 
-export async function fetchTeams() {
+export async function fetchTeams({ userId, includeAll = false } = {}) {
   if (!supabase) {
     throw new Error(supabaseConfigError)
   }
 
-  const { data, error } = await supabase
-    .from('inscricoes')
-    .select('*')
-    .order('created_at', { ascending: false })
+  if (!includeAll && !userId) {
+    return []
+  }
+
+  const baseQuery = supabase.from('inscricoes').select('*')
+  const query = includeAll ? baseQuery : baseQuery.eq('user_id', userId)
+  const { data, error } = await query.order('created_at', { ascending: false })
 
   if (error) {
     throw error
