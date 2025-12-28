@@ -252,14 +252,7 @@ function App() {
     setFormData((current) => ({ ...current, [name]: value }))
   }
 
-  const cpfExists = (teams, cpfDigits, modalidade) => {
-    if (!cpfDigits) return false
-
-    return teams.some((team) => {
-      if (modalidade && team.modalidade !== modalidade) return false
-      return sanitizeDigits(team.cpf || '') === cpfDigits
-    })
-  }
+  
 
 
   const handleSubmit = async (event) => {
@@ -292,8 +285,8 @@ function App() {
       ...(!validateCPF(formData.cpf) ? ['CPF inválido'] : []),
       ...(!validateCelular(formData.celular) ? ['Número de celular inválido'] : []),
 
-      ...(cpfExists(times, cpfDigits, formData.modalidade)
-        ? ['Este CPF já possui um time cadastrado nesta modalidade.']
+      ...(cpfExists(times, cpfDigits)
+        ? ['Este CPF já foi usado em outra conta.']
         : []),
 
       ...(formData.modalidade === 'futebol' && integrantesList.length > 15
@@ -307,6 +300,22 @@ function App() {
 
     if (validationErrors.length) {
       setErrors(validationErrors)
+      return
+    }
+
+    try {
+      const cpfEmUso = await cpfAlreadyUsed(formData.cpf, cpfDigits)
+      if (cpfEmUso) {
+        setErrors(['Este CPF já foi usado em outra conta.'])
+        return
+      }
+    } catch (error) {
+      console.error('Erro ao validar CPF', error)
+      const message =
+        error?.message?.includes('Supabase não configurado')
+          ? 'Configuração do Supabase ausente. Verifique VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.'
+          : 'Não foi possível validar o CPF agora. Tente novamente em instantes.'
+      setErroServidor(message)
       return
     }
 
@@ -335,9 +344,10 @@ function App() {
       navigate('/carrinho')
     } catch (error) {
       console.error('Erro ao salvar time', error)
-      const message =
-        error?.message?.includes('Supabase não configurado')
-          ? 'Configuração do Supabase ausente. Verifique VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.'
+      const message = error?.message?.includes('Supabase não configurado')
+        ? 'Configuração do Supabase ausente. Verifique VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.'
+        : error?.message?.includes('CPF já possui um time cadastrado')
+          ? 'Este CPF já possui um time cadastrado nesta modalidade.'
           : 'Não foi possível salvar no momento. Tente novamente em instantes.'
       setErroServidor(message)
     }

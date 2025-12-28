@@ -12,10 +12,7 @@ export const formatCpfForDisplay = (cpf) => {
   const digits = sanitizeDigits(cpf)
   if (digits.length !== 11) return cpf
 
-  return value
-    .split(/[\n,]+/)
-    .map((item) => item.trim())
-    .filter(Boolean)
+  return buildProtectedCpf(digits)
 }
 
 export const parseIntegrantesList = (value) => {
