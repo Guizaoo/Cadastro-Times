@@ -20,21 +20,51 @@ const initialRegister = {
   aceitar: false,
 };
 
+const initialRecover = {
+  email: "",
+};
+
+const initialUpdate = {
+  senha: "",
+  confirmar: "",
+};
+
 export function AuthPage({ onLoginSuccess }) {
   const [view, setView] = useState("login");
   const [loginData, setLoginData] = useState(initialLogin);
   const [registerData, setRegisterData] = useState(initialRegister);
+  const [recoverData, setRecoverData] = useState(initialRecover);
+  const [updateData, setUpdateData] = useState(initialUpdate);
   const [feedback, setFeedback] = useState("");
   const [error, setError] = useState("");
   const [busy, setBusy] = useState(false);
   const [user, setUser] = useState(null);
 
   const isLogin = view === "login";
+  const isRegister = view === "register";
+  const isRecover = view === "recover";
+  const isUpdate = view === "update";
+  const title =
+    {
+      login: "Acesse sua conta",
+      register: "Crie sua conta",
+      recover: "Recupere sua senha",
+      update: "Defina sua nova senha",
+    }[view] ?? "Acesse sua conta";
 
   useEffect(() => {
     if (!supabase) {
       setError(supabaseConfigError);
       return;
+    }
+
+    if (typeof window !== "undefined") {
+      const isRecoveryHash = window.location.hash.includes("type=recovery");
+      if (isRecoveryHash) {
+        setView("update");
+        setFeedback("Defina uma nova senha para concluir a recuperação.");
+        setError("");
+      }
     }
 
     supabase.auth.getSession().then(({ data, error: sessionError }) => {
@@ -46,8 +76,13 @@ export function AuthPage({ onLoginSuccess }) {
     });
 
     const { data: listener } = supabase.auth.onAuthStateChange(
-      (_event, session) => {
+      (event, session) => {
         setUser(session?.user ?? null);
+        if (event === "PASSWORD_RECOVERY") {
+          setView("update");
+          setFeedback("Defina uma nova senha para concluir a recuperação.");
+          setError("");
+        }
       }
     );
 
@@ -72,6 +107,22 @@ export function AuthPage({ onLoginSuccess }) {
     }));
   };
 
+  const handleRecoverChange = (event) => {
+    const { name, value } = event.target;
+    setRecoverData((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  };
+
+  const handleUpdateChange = (event) => {
+    const { name, value } = event.target;
+    setUpdateData((current) => ({
+      ...current,
+      [name]: value,
+    }));
+  };
+
   const registerStatus = useMemo(() => {
     if (!registerData.senha || !registerData.confirmar) return "";
     return registerData.senha === registerData.confirmar
@@ -79,10 +130,21 @@ export function AuthPage({ onLoginSuccess }) {
       : "As senhas não conferem.";
   }, [registerData.confirmar, registerData.senha]);
 
-  const handleSubmit = async (event) => {
-    event.preventDefault();
+  const updateStatus = useMemo(() => {
+    if (!updateData.senha || !updateData.confirmar) return "";
+    return updateData.senha === updateData.confirmar
+      ? "Senha confirmada."
+      : "As senhas não conferem.";
+  }, [updateData.confirmar, updateData.senha]);
+
+  const clearMessages = () => {
     setFeedback("");
     setError("");
+  };
+
+  const handleSubmit = async (event) => {
+    event.preventDefault();
+    clearMessages();
 
     if (!supabase) {
       setError(supabaseConfigError);
@@ -115,7 +177,7 @@ export function AuthPage({ onLoginSuccess }) {
             : "Login realizado! Sua sessão será mantida apenas nesta aba."
         );
         onLoginSuccess?.();
-      } else {
+      } else if (isRegister) {
         if (registerData.senha !== registerData.confirmar) {
           setError("As senhas precisam ser iguais.");
           return;
@@ -144,6 +206,56 @@ export function AuthPage({ onLoginSuccess }) {
         setFeedback(
           "Cadastro criado! Verifique seu e-mail para confirmar o acesso."
         );
+      } else if (isRecover) {
+        if (!recoverData.email?.trim()) {
+          setError("Informe seu e-mail para continuar.");
+          return;
+        }
+
+        const redirectTo =
+          typeof window !== "undefined"
+            ? `${window.location.origin}/acesso`
+            : undefined;
+
+        const { error: recoverError } =
+          await supabase.auth.resetPasswordForEmail(recoverData.email, {
+            redirectTo,
+          });
+
+        if (recoverError) {
+          setError(recoverError.message);
+          return;
+        }
+
+        setFeedback(
+          "Enviamos um link de recuperação para o seu e-mail. Verifique a caixa de entrada."
+        );
+      } else if (isUpdate) {
+        if (!updateData.senha || !updateData.confirmar) {
+          setError("Preencha e confirme a nova senha.");
+          return;
+        }
+        if (updateData.senha !== updateData.confirmar) {
+          setError("As senhas precisam ser iguais.");
+          return;
+        }
+
+        const { error: updateError } = await supabase.auth.updateUser({
+          password: updateData.senha,
+        });
+
+        if (updateError) {
+          setError(updateError.message);
+          return;
+        }
+
+        setFeedback("Senha atualizada! Faça login com sua nova senha.");
+        setUpdateData(initialUpdate);
+        await supabase.auth.signOut();
+        if (typeof window !== "undefined") {
+          window.history.replaceState({}, "", window.location.pathname);
+        }
+        setView("login");
       }
     } finally {
       setBusy(false);
@@ -182,9 +294,7 @@ export function AuthPage({ onLoginSuccess }) {
               </span>
             </div>
             <div className="space-y-1">
-              <h1 className="text-2xl font-semibold">
-                {isLogin ? "Acesse sua conta" : "Crie sua conta"}
-              </h1>
+              <h1 className="text-2xl font-semibold">{title}</h1>
             </div>
           </div>
 
@@ -240,13 +350,21 @@ export function AuthPage({ onLoginSuccess }) {
                   </label>
                   <button
                     type="button"
+                    onClick={() => {
+                      setView("recover");
+                      setRecoverData((current) => ({
+                        ...current,
+                        email: loginData.email,
+                      }));
+                      clearMessages();
+                    }}
                     className="text-amber-200 hover:text-amber-100"
                   >
                     Esqueci minha senha
                   </button>
                 </div>
               </>
-            ) : (
+            ) : isRegister ? (
               <>
                 <InputField
                   id="nome"
@@ -307,6 +425,63 @@ export function AuthPage({ onLoginSuccess }) {
                   Li e aceito os termos de uso e política da copa.
                 </label>
               </>
+            ) : isRecover ? (
+              <>
+                <div className="flex flex-col gap-2">
+                  <label
+                    className="text-sm font-semibold text-slate-200"
+                    htmlFor="recoverEmail"
+                  >
+                    E-mail
+                  </label>
+                  <div className="flex items-center gap-2 rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm text-slate-200 focus-within:border-amber-400 focus-within:ring-2 focus-within:ring-amber-500/40">
+                    <input
+                      id="recoverEmail"
+                      name="email"
+                      value={recoverData.email}
+                      onChange={handleRecoverChange}
+                      placeholder="voce@email.com"
+                      type="email"
+                      className="w-full bg-transparent text-sm text-slate-100 outline-none placeholder:text-slate-500"
+                    />
+                  </div>
+                </div>
+                <p className="text-xs text-slate-400">
+                  Enviaremos um link para redefinir sua senha.
+                </p>
+              </>
+            ) : (
+              <>
+                <InputField
+                  id="novaSenha"
+                  label="Nova senha"
+                  value={updateData.senha}
+                  onChange={handleUpdateChange}
+                  placeholder="Crie uma nova senha"
+                  type="password"
+                  className="border-slate-700 bg-slate-900 text-slate-100 placeholder:text-slate-500"
+                />
+                <InputField
+                  id="confirmarNovaSenha"
+                  label="Confirmar nova senha"
+                  value={updateData.confirmar}
+                  onChange={handleUpdateChange}
+                  placeholder="Confirme sua nova senha"
+                  type="password"
+                  className="border-slate-700 bg-slate-900 text-slate-100 placeholder:text-slate-500"
+                />
+                {updateStatus && (
+                  <p
+                    className={`text-xs ${
+                      updateStatus === "Senha confirmada."
+                        ? "text-emerald-200"
+                        : "text-rose-200"
+                    }`}
+                  >
+                    {updateStatus}
+                  </p>
+                )}
+              </>
             )}
 
             {error && (
@@ -327,7 +502,15 @@ export function AuthPage({ onLoginSuccess }) {
                 disabled={busy}
                 className="inline-flex w-full items-center justify-center rounded-xl bg-linear-to-r from-amber-400 to-amber-300 px-5 py-2 text-sm font-semibold text-slate-950 shadow-lg shadow-amber-500/30 transition hover:from-amber-300 hover:to-amber-200 focus:outline-none focus:ring-2 focus:ring-amber-300/70 disabled:cursor-not-allowed disabled:from-amber-200 disabled:to-amber-200 sm:w-auto"
               >
-                {busy ? "Processando..." : isLogin ? "Entrar" : "Criar conta"}
+                {busy
+                  ? "Processando..."
+                  : isLogin
+                    ? "Entrar"
+                    : isRegister
+                      ? "Criar conta"
+                      : isRecover
+                        ? "Enviar link"
+                        : "Salvar nova senha"}
               </button>
               {user && (
                 <button
@@ -347,29 +530,38 @@ export function AuthPage({ onLoginSuccess }) {
                     type="button"
                     onClick={() => {
                       setView("register");
-                      setFeedback("");
-                      setError("");
+                      clearMessages();
                     }}
                     className="font-semibold text-amber-200 hover:text-amber-100"
                   >
                     Registrar-se
                   </button>
                 </>
-              ) : (
+              ) : isRegister ? (
                 <>
                   Já tem conta?{" "}
                   <button
                     type="button"
                     onClick={() => {
                       setView("login");
-                      setFeedback("");
-                      setError("");
+                      clearMessages();
                     }}
                     className="font-semibold text-amber-200 hover:text-amber-100"
                   >
                     Entrar
                   </button>
                 </>
+              ) : (
+                <button
+                  type="button"
+                  onClick={() => {
+                    setView("login");
+                    clearMessages();
+                  }}
+                  className="font-semibold text-amber-200 hover:text-amber-100"
+                >
+                  Voltar para o login
+                </button>
               )}
             </div>
           </form>

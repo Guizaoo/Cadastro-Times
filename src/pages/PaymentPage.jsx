@@ -4,8 +4,14 @@ import { formatCpfForDisplay } from '../utils/cpf'
 // ==============================
 // Constantes auxiliares
 // ==============================
-const DEFAULT_PIX_KEY = '98988831316'
-const DEFAULT_PIX_AMOUNT = 0.1
+const DEFAULT_PIX_KEY = '00f52046-d0b4-4bab-be6a-8f43c9d118a9'
+const DEFAULT_PIX_AMOUNT = 400
+
+const PIX_AMOUNT_BY_MODALIDADE = {
+  futebol: 400,
+  volei: 300,
+}
+
 const BANK_QR_IMAGE_PATH = '/pix-qrcode.jpeg'
 const WHATSAPP_NUMBER = '5598988831316'
 
@@ -64,31 +70,38 @@ export function PaymentPage({
     [times, teamId]
   )
 
-  const pixAmount = useMemo(() => DEFAULT_PIX_AMOUNT, [])
-  const modalidadeLabel = useMemo(() => formatModalidadeLabel(team), [team])
+  // ✅ REMOVIDO useMemo problemático (React Compiler friendly)
+  const pixAmount =
+    PIX_AMOUNT_BY_MODALIDADE[team?.modalidade] ?? DEFAULT_PIX_AMOUNT
+
+  const modalidadeLabel = useMemo(
+    () => formatModalidadeLabel(team),
+    [team]
+  )
 
   // abrir WhatsApp
   const openWhatsapp = () => {
-  if (hasOpenedWhatsapp.current) return
-  hasOpenedWhatsapp.current = true
+    if (hasOpenedWhatsapp.current) return
+    hasOpenedWhatsapp.current = true
 
-  const messageParts = [
-    `Olá! Realizei o pagamento do PIX no valor de ${formatCurrency(
-      pixAmount
-    )} referente ao time "${team?.nomeEquipe ?? ''}".`,
-    ...(modalidadeLabel ? [`Modalidade: ${modalidadeLabel}`] : []),
-    ...(team?.nome ? [`Responsável: ${team.nome}`] : []),
-    ...(team?.cpf ? [`CPF: ${formatCpfForDisplay(team.cpf)}`] : []),
-  ]
+    const messageParts = [
+      `Olá! Realizei o pagamento do PIX no valor de ${formatCurrency(
+        pixAmount
+      )} referente ao time "${team?.nomeEquipe ?? ''}".`,
+      ...(modalidadeLabel ? [`Modalidade: ${modalidadeLabel}`] : []),
+      ...(team?.nome ? [`Responsável: ${team.nome}`] : []),
+      ...(team?.cpf
+        ? [`CPF: ${formatCpfForDisplay(team.cpf)}`]
+        : []),
+    ]
 
-  const message = encodeURIComponent(messageParts.join('\n'))
+    const message = encodeURIComponent(messageParts.join('\n'))
 
-  window.open(
-    `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`,
-    '_blank'
-  )
-}
-
+    window.open(
+      `https://wa.me/${WHATSAPP_NUMBER}?text=${message}`,
+      '_blank'
+    )
+  }
 
   if (!team) {
     return (
@@ -128,16 +141,19 @@ export function PaymentPage({
           <p>
             <strong>Responsável:</strong> {team.nome}
           </p>
+
           {modalidadeLabel && (
             <p>
               <strong>Modalidade:</strong> {modalidadeLabel}
             </p>
           )}
+
           {team.cpf && (
             <p>
               <strong>CPF:</strong> {formatCpfForDisplay(team.cpf)}
             </p>
           )}
+
           <p>
             <strong>Valor:</strong>{' '}
             <span className="text-emerald-400 font-semibold">

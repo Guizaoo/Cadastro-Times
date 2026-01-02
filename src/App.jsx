@@ -6,7 +6,7 @@ import { HomePage } from './pages/HomePage'
 import { initialForm } from './pages/homePageConfig'
 import { PaymentPage } from './pages/PaymentPage'
 import { supabase } from './services/supabase'
-import { cpfAlreadyUsed, fetchTeams, saveTeam } from './services/teamApi'
+import { cpfAlreadyUsed, fetchTeams, removeTeam, saveTeam, updateTeamStatus } from './services/teamApi'
 import {
   cpfExists,
   formatCelular,
@@ -211,7 +211,13 @@ function App() {
   const isPaymentRoute = route.startsWith('/pagamento')
   const isCartRoute = route.startsWith('/carrinho')
   const isAuthRoute = route.startsWith('/acesso')
-
+  const isRecoveryFlow = useMemo(
+    () =>
+      isAuthRoute &&
+      typeof window !== 'undefined' &&
+      window.location.hash.includes('type=recovery'),
+    [isAuthRoute]
+  )
   // ==============================
   // 4) Guard de autenticação
   // ==============================
@@ -220,10 +226,10 @@ function App() {
 
     if (!user && !isAuthRoute) {
       navigate('/acesso')
-    } else if (user && isAuthRoute) {
+    } else if (user && isAuthRoute && !isRecoveryFlow) {
       navigate('/')
     }
-  }, [authReady, user, isAuthRoute, navigate])
+  }, [authReady, user, isAuthRoute, isRecoveryFlow, navigate])
 
   // ==============================
   // Estatísticas da home
@@ -371,6 +377,40 @@ function App() {
     }
   }
 
+  const handleStatusChange = async (id, status) => {
+    setErroServidor('')
+    try {
+      const updatedTeam = await updateTeamStatus(id, status)
+      setTimes((current) =>
+        current.map((time) =>
+          time.id === id ? (updatedTeam ?? { ...time, status }) : time
+        )
+      )
+    } catch (error) {
+      console.error('Erro ao atualizar status', error)
+      const message =
+        error?.message?.includes('Supabase não configurado')
+          ? 'Configuração do Supabase ausente. Verifique VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.'
+          : 'Não foi possível atualizar o status. Tente novamente mais tarde.'
+      setErroServidor(message)
+    }
+  }
+
+  const handleDelete = async (id) => {
+    setErroServidor('')
+    try {
+      await removeTeam(id)
+      setTimes((current) => current.filter((time) => time.id !== id))
+    } catch (error) {
+      console.error('Erro ao excluir time', error)
+      const message =
+        error?.message?.includes('Supabase não configurado')
+          ? 'Configuração do Supabase ausente. Verifique VITE_SUPABASE_URL e VITE_SUPABASE_ANON_KEY.'
+          : 'Não foi possível excluir o cadastro. Tente novamente mais tarde.'
+      setErroServidor(message)
+    }
+  }
+
   // ==============================
   // Loading (usando carregando de verdade)
   // ==============================
@@ -471,9 +511,8 @@ function App() {
         times={times}
         carregando={carregando}
         erroServidor={erroServidor}
-        // Se seu AdminPage exigir essas props, você precisa implementar de volta
-        // onDelete={...}
-        // onStatusChange={...}
+        onDelete={handleDelete}
+        onStatusChange={handleStatusChange}
         onNavigateHome={() => navigate('/')}
         onNavigateCart={() => navigate('/carrinho')}
         userDisplayName={displayName}
