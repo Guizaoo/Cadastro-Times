@@ -509,7 +509,7 @@ export function AuthPage({ onLoginSuccess }) {
                     : isRegister
                       ? "Criar conta"
                       : isRecover
-                        ? "Enviar link"
+                        ? "Enviar"
                         : "Salvar nova senha"}
               </button>
               {user && (
