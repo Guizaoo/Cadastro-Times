@@ -276,6 +276,10 @@ function App() {
 
     const integrantesList = parseIntegrantesList(formData.integrantes)
     const cpfDigits = sanitizeDigits(formData.cpf)
+     const instagramTrimmed = formData.instagram?.trim() ?? ''
+    const instagramRaw = instagramTrimmed.replace(/\s+/g, '')
+    const instagramHandle =
+      instagramRaw && !instagramRaw.startsWith('@') ? `@${instagramRaw}` : instagramRaw
 
     // Validações básicas
     const validationErrors = [
@@ -283,6 +287,7 @@ function App() {
       ...(!formData.nomeEquipe?.trim() ? ['Nome da equipe é obrigatório'] : []),
       ...(!formData.cpf?.trim() ? ['CPF é obrigatório'] : []),
       ...(!formData.celular?.trim() ? ['Celular é obrigatório'] : []),
+      ...(!instagramHandle || instagramHandle.length < 2 ? ['Instagram é obrigatório dos participantes'] : []),
       ...(!formData.integrantes?.trim() ? ['Integrantes é obrigatório'] : []),
       ...(formData.modalidade === 'volei' && !formData.categoriaVolei?.trim()
         ? ['Categoria do vôlei é obrigatória']
@@ -332,6 +337,7 @@ function App() {
       nomeEquipe: normalizeText(formData.nomeEquipe),
       cpf: formatCPF(formData.cpf),
       celular: formatCelular(formData.celular),
+      instagram: instagramHandle,
       integrantes: integrantesList.join(', '),
       categoriaVolei: normalizeText(formData.categoriaVolei || ''),
       status: 'pendente',

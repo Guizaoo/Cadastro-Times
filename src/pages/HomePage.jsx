@@ -143,6 +143,16 @@ export function HomePage({
                 />
               </div>
 
+              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <InputField
+                  id="instagram"
+                  label="Instagram*"
+                  value={formData.instagram}
+                  onChange={handleChange}
+                  placeholder="@seutime"
+                />
+              </div>
+
               <div className="flex flex-col gap-2">
                 <label
                   className="text-sm font-semibold text-slate-200"

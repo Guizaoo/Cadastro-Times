@@ -16,6 +16,7 @@ const initialForm = {
   nomeEquipe: '',
   cpf: '',
   celular: '',
+  instagram: '',
   integrantes: '',
   categoriaVolei: '',
 }
