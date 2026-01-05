@@ -84,6 +84,7 @@ export function HomePage({
                           modalidade: key,
                           categoriaVolei:
                             key === "volei" ? current.categoriaVolei : "",
+                            instagram: key === "volei" ? current.instagram : "",
                         }))
                       }
                       className={`rounded-xl border px-4 py-3 text-left transition focus:outline-none focus:ring-2 focus:ring-amber-400/70 ${
@@ -110,7 +111,7 @@ export function HomePage({
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <InputField
                   id="nome"
-                  label="Nome*"
+                  label="Nome Do Responsável*"
                   value={formData.nome}
                   onChange={handleChange}
                   placeholder="Seu nome completo"
@@ -143,15 +144,17 @@ export function HomePage({
                 />
               </div>
 
-              <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
-                <InputField
-                  id="instagram"
-                  label="Instagram da dupla*"
-                  value={formData.instagram}
-                  onChange={handleChange}
-                  placeholder="@SeuInstagram, @SuaDupla"
-                />
-              </div>
+              {formData.modalidade === "volei" && (
+                <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                  <InputField
+                    id="instagram"
+                    label="Instagram da dupla*"
+                    value={formData.instagram}
+                    onChange={handleChange}
+                    placeholder="@SeuInstagram, @SuaDupla"
+                  />
+                </div>
+              )}
 
               <div className="flex flex-col gap-2">
                 <label
