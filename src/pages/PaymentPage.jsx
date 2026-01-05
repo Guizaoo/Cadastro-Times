@@ -9,7 +9,7 @@ const DEFAULT_PIX_AMOUNT = 400
 
 const PIX_AMOUNT_BY_MODALIDADE = {
   futebol: 400,
-  volei: 300,
+  volei: 200,
 }
 
 const BANK_QR_IMAGE_PATH = '/pix-qrcode.jpeg'
