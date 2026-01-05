@@ -41,7 +41,7 @@ export function HomePage({
               chega se sentir acolhido.
             </p>
             <p className="text-sm text-amber-100">
-              O formulário pede somente o essencial (nome, equipe, integrantes,
+              O formulário pede somente o essencial (Nome do responsável, Nome da equipe, integrantes,
               CPF e celular) para que cada clube se sinta convidado desde o
               primeiro clique.
             </p>
