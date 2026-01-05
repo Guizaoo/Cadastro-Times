@@ -146,10 +146,10 @@ export function HomePage({
               <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
                 <InputField
                   id="instagram"
-                  label="Instagram*"
+                  label="Instagram da dupla*"
                   value={formData.instagram}
                   onChange={handleChange}
-                  placeholder="@seutime"
+                  placeholder="@SeuInstagram, @SuaDupla"
                 />
               </div>
 

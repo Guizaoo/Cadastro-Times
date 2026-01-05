@@ -1,5 +1,5 @@
 import { useMemo, useRef, useState } from 'react'
-import { formatCpfForDisplay } from '../utils/cpf'
+import { formatCpfForDisplay, parseIntegrantesList } from '../utils/cpf'
 
 // ==============================
 // Constantes auxiliares
@@ -13,7 +13,7 @@ const PIX_AMOUNT_BY_MODALIDADE = {
 }
 
 const BANK_QR_IMAGE_PATH = '/pix-qrcode.jpeg'
-const WHATSAPP_NUMBER = '5598988831316'
+const WHATSAPP_NUMBER = '5598981493861'
 
 // ==============================
 // Helpers
@@ -79,10 +79,20 @@ export function PaymentPage({
     [team]
   )
 
+    const integrantesList = useMemo(
+    () => parseIntegrantesList(team?.integrantes).filter(Boolean),
+    [team?.integrantes]
+  )
+
   // abrir WhatsApp
   const openWhatsapp = () => {
     if (hasOpenedWhatsapp.current) return
     hasOpenedWhatsapp.current = true
+
+     const integrantesList = parseIntegrantesList(team?.integrantes).filter(
+      Boolean
+    )
+
 
     const messageParts = [
       `Olá! Realizei o pagamento do PIX no valor de ${formatCurrency(
@@ -92,6 +102,9 @@ export function PaymentPage({
       ...(team?.nome ? [`Responsável: ${team.nome}`] : []),
       ...(team?.cpf
         ? [`CPF: ${formatCpfForDisplay(team.cpf)}`]
+        : []),
+        ...(integrantesList.length
+        ? [`Integrantes: ${integrantesList.join(', ')}`]
         : []),
     ]
 
@@ -151,6 +164,13 @@ export function PaymentPage({
           {team.cpf && (
             <p>
               <strong>CPF:</strong> {formatCpfForDisplay(team.cpf)}
+            </p>
+          )}
+
+          {integrantesList.length > 0 && (
+            <p>
+              <strong>Integrantes:</strong>{' '}
+              {integrantesList.join(', ')}
             </p>
           )}
 
