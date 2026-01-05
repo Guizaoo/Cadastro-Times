@@ -174,7 +174,7 @@ export function HomePage({
                 <p className="text-xs text-slate-400">
                   {formData.modalidade === "volei"
                     ? "Apenas duplas: informe exatamente 2 nomes, separados por vírgula ou quebra de linha."
-                    : "Limite de 15 pessoas: separe os nomes por vírgula ou quebra de linha."}
+                    : "Limite de 18 pessoas: separe os nomes por vírgula ou quebra de linha."}
                 </p>
               </div>
 

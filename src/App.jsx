@@ -299,12 +299,12 @@ function App() {
       ...(!validateCPF(formData.cpf) ? ['CPF inválido'] : []),
       ...(!validateCelular(formData.celular) ? ['Número de celular inválido'] : []),
 
-      ...(cpfExists(times, cpfDigits)
+      ...(cpfExists(times, cpfDigits, formData.modalidade)
         ? ['Este CPF já foi usado em outra conta.']
         : []),
 
-      ...(formData.modalidade === 'futebol' && integrantesList.length > 15
-        ? ['Limite de 15 integrantes para futebol']
+      ...(formData.modalidade === 'futebol' && integrantesList.length > 18
+        ? ['Limite de 18 integrantes para futebol']
         : []),
 
       ...(formData.modalidade === 'volei' && integrantesList.length !== 2
@@ -318,7 +318,7 @@ function App() {
     }
 
     try {
-      const cpfEmUso = await cpfAlreadyUsed(formData.cpf, cpfDigits)
+     const cpfEmUso = await cpfAlreadyUsed(formData.cpf, cpfDigits, formData.modalidade)
       if (cpfEmUso) {
         setErrors(['Este CPF já foi usado em outra conta.'])
         return
