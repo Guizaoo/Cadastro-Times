@@ -1,6 +1,6 @@
 import React, { useMemo } from 'react'
 import { NavigationBar, SmallStat, StatusBadge } from '../components/ui'
-import { formatCpfForDisplay } from '../utils/cpf'
+import { formatCpfForDisplay, parseIntegrantesList } from '../utils/cpf'
 
 
 const formatCreatedAt = (dateString) =>
@@ -83,6 +83,7 @@ export function AdminPage({ times, carregando, erroServidor, onDelete, onStatusC
                     <th className="px-4 py-3 text-left">Equipe</th>
                     <th className="px-4 py-3 text-left">Modalidade</th>
                     <th className="px-4 py-3 text-left">Integrantes</th>
+                    <th className="px-4 py-3 text-left">Instagram</th>
                     <th className="px-4 py-3 text-left">Contato</th>
                     <th className="px-4 py-3 text-left">Status</th>
                     <th className="px-4 py-3 text-left">Criado em</th>
@@ -90,7 +91,19 @@ export function AdminPage({ times, carregando, erroServidor, onDelete, onStatusC
                   </tr>
                 </thead>
                 <tbody>
-                  {times.map((time) => (
+                  {times.map((time) => {
+                    const integrantesList = parseIntegrantesList(time.integrantes).filter(Boolean)
+                    const instagramList = parseIntegrantesList(time.instagram).filter(Boolean)
+                    const rowCount = Math.max(integrantesList.length, instagramList.length)
+                    const displayRows =
+                      rowCount > 0
+                        ? Array.from({ length: rowCount }, (_, index) => ({
+                          integrante: integrantesList[index],
+                          instagram: instagramList[index],
+                        }))
+                        : [{ integrante: null, instagram: null }]
+
+                    return (
                     <tr key={time.id} className="border-t border-slate-800/80">
                       <td className="px-4 py-3">
                         <div className="font-semibold text-slate-50">{time.nomeEquipe}</div>
@@ -100,7 +113,32 @@ export function AdminPage({ times, carregando, erroServidor, onDelete, onStatusC
                         {time.modalidade}
                         {time.modalidade === 'volei' && ` • ${time.categoriaVolei}`}
                       </td>
-                      <td className="px-4 py-3 text-xs text-slate-300">{time.integrantes}</td>
+                      <td className="px-4 py-3 text-xs text-slate-300">
+                        <div className="space-y-1">
+                          {displayRows.map((row, index) => (
+                            <div key={`${time.id}-integrante-${index}`} className="truncate">
+                              {row.integrante ? (
+                                row.integrante
+                              ) : (
+                                <span className="text-slate-500">-</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </td>
+                      <td className="px-4 py-3 text-xs text-slate-300">
+                        <div className="space-y-1">
+                          {displayRows.map((row, index) => (
+                            <div key={`${time.id}-instagram-${index}`} className="truncate">
+                              {row.instagram ? (
+                                row.instagram
+                              ) : (
+                                <span className="text-slate-500">-</span>
+                              )}
+                            </div>
+                          ))}
+                        </div>
+                      </td>
                       <td className="px-4 py-3 text-xs text-slate-300">{time.celular}</td>
                       <td className="px-4 py-3 text-xs">
                         <StatusBadge status={time.status} />
@@ -139,7 +177,8 @@ export function AdminPage({ times, carregando, erroServidor, onDelete, onStatusC
                         </div>
                       </td>
                     </tr>
-                  ))}
+                    )
+                  })}
                 </tbody>
               </table>
             </div>
