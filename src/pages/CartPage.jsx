@@ -14,6 +14,7 @@ export function CartPage({
   times = [],
   onNavigateHome,
   onNavigatePayment,
+  onNavigateEdit,
   onNavigateCart,
   userDisplayName,
 }) {
@@ -115,13 +116,22 @@ export function CartPage({
                   <div className="flex flex-col items-stretch gap-3 sm:items-end">
                     <StatusBadge status={time.status} />
 
-                    <button
-                      type="button"
-                      onClick={() => onNavigatePayment?.(time.id)}
-                      className="w-full rounded-lg border border-emerald-500/50 px-4 py-2 text-xs font-semibold text-emerald-100 transition hover:bg-emerald-500/10 sm:w-auto"
-                    >
-                      Ir para pagamento
-                    </button>
+                    <div className="flex w-full flex-col gap-2 sm:w-auto sm:flex-row sm:justify-end">
+                      <button
+                        type="button"
+                        onClick={() => onNavigateEdit?.(time.id)}
+                        className="w-full rounded-lg border border-amber-400/60 px-4 py-2 text-xs font-semibold text-amber-100 transition hover:bg-amber-400/10 sm:w-auto"
+                      >
+                        Editar
+                      </button>
+                      <button
+                        type="button"
+                        onClick={() => onNavigatePayment?.(time.id)}
+                        className="w-full rounded-lg border border-emerald-500/50 px-4 py-2 text-xs font-semibold text-emerald-100 transition hover:bg-emerald-500/10 sm:w-auto"
+                      >
+                        Ir para pagamento
+                      </button>
+                    </div>
                   </div>
 
                 </div>

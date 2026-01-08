@@ -6,7 +6,14 @@ import { HomePage } from './pages/HomePage'
 import { initialForm } from './pages/homePageConfig'
 import { PaymentPage } from './pages/PaymentPage'
 import { supabase } from './services/supabase'
-import { cpfAlreadyUsed, fetchTeams, removeTeam, saveTeam, updateTeamStatus } from './services/teamApi'
+import {
+  cpfAlreadyUsed,
+  fetchTeams,
+  removeTeam,
+  saveTeam,
+  updateTeam,
+  updateTeamStatus,
+} from './services/teamApi'
 import {
   cpfExists,
   formatCelular,
@@ -34,6 +41,7 @@ function App() {
   const [carregando, setCarregando] = useState(true)
   const [erroServidor, setErroServidor] = useState('')
   const [errors, setErrors] = useState([])
+  const [editingTeamId, setEditingTeamId] = useState('')
 
   // Auth (Supabase)
   const [authReady, setAuthReady] = useState(false)
@@ -250,6 +258,11 @@ function App() {
     }
   }, [times])
 
+  const editingTeam = useMemo(
+    () => times.find((time) => time.id === editingTeamId) ?? null,
+    [times, editingTeamId]
+  )
+
   // ==============================
   // Eventos do formulário
   // ==============================
@@ -258,8 +271,21 @@ function App() {
     setFormData((current) => ({ ...current, [name]: value }))
   }
 
-  
+  useEffect(() => {
+    if (!editingTeamId) return
 
+    if (editingTeam) {
+      setFormData({ ...initialForm, ...editingTeam })
+      setErrors([])
+      setErroServidor('')
+      return
+    }
+
+    if (!carregando) {
+      setEditingTeamId('')
+      setFormData(initialForm)
+    }
+  }, [editingTeamId, editingTeam, carregando])
 
   const handleSubmit = async (event) => {
     event.preventDefault()
@@ -268,18 +294,20 @@ function App() {
     setErroServidor('')
     setErrors([])
 
- if (!user?.id) {
+    if (!user?.id) {
       setErroServidor('Faça login para salvar o cadastro.')
       return
     }
 
+    const isEditing = Boolean(editingTeamId && editingTeam)
+    const currentTeamId = isEditing ? editingTeamId : ''
 
     const integrantesList = parseIntegrantesList(formData.integrantes)
     const cpfDigits = sanitizeDigits(formData.cpf)
     const instagramTrimmed = formData.instagram?.trim() ?? ''
     const instagramRaw = instagramTrimmed.replace(/\s+/g, '')
     const instagramHandle =
-    instagramRaw && !instagramRaw.startsWith('@') ? `@${instagramRaw}` : instagramRaw
+      instagramRaw && !instagramRaw.startsWith('@') ? `@${instagramRaw}` : instagramRaw
     const requiresInstagram = formData.modalidade === 'volei'
 
     // Validações básicas
@@ -299,7 +327,7 @@ function App() {
       ...(!validateCPF(formData.cpf) ? ['CPF inválido'] : []),
       ...(!validateCelular(formData.celular) ? ['Número de celular inválido'] : []),
 
-      ...(cpfExists(times, cpfDigits, formData.modalidade)
+      ...(cpfExists(times, cpfDigits, formData.modalidade, currentTeamId)
         ? ['Este CPF já foi usado em outra conta.']
         : []),
 
@@ -318,7 +346,12 @@ function App() {
     }
 
     try {
-     const cpfEmUso = await cpfAlreadyUsed(formData.cpf, cpfDigits, formData.modalidade)
+      const cpfEmUso = await cpfAlreadyUsed(
+        formData.cpf,
+        cpfDigits,
+        formData.modalidade,
+        currentTeamId
+      )
       if (cpfEmUso) {
         setErrors(['Este CPF já foi usado em outra conta.'])
         return
@@ -334,6 +367,15 @@ function App() {
     }
 
     // Normalizações
+    const baseTeam = isEditing
+      ? editingTeam
+      : {
+          status: 'pendente',
+          id: crypto.randomUUID(),
+          criadoEm: new Date().toISOString(),
+          userId: user?.id ?? '',
+        }
+
     const novoTime = {
       ...formData,
       nome: normalizeText(formData.nome),
@@ -343,17 +385,25 @@ function App() {
       instagram: requiresInstagram ? instagramHandle : '',
       integrantes: integrantesList.join(', '),
       categoriaVolei: normalizeText(formData.categoriaVolei || ''),
-      status: 'pendente',
-      id: crypto.randomUUID(),
-      criadoEm: new Date().toISOString(),
-      userId: user?.id ?? '',
+      status: baseTeam?.status ?? 'pendente',
+      id: baseTeam?.id ?? crypto.randomUUID(),
+      criadoEm: baseTeam?.criadoEm ?? new Date().toISOString(),
+      userId: baseTeam?.userId ?? user?.id ?? '',
     }
 
     try {
-      const result = await saveTeam(novoTime)
-      const savedTeam = { ...novoTime, ...result }
-
-      setTimes((current) => [savedTeam, ...current])
+      if (isEditing) {
+        const result = await updateTeam(novoTime)
+        const savedTeam = { ...novoTime, ...result }
+        setTimes((current) =>
+          current.map((time) => (time.id === savedTeam.id ? savedTeam : time))
+        )
+        setEditingTeamId('')
+      } else {
+        const result = await saveTeam(novoTime)
+        const savedTeam = { ...novoTime, ...result }
+        setTimes((current) => [savedTeam, ...current])
+      }
       setFormData(initialForm)
       setErrors([])
       navigate('/carrinho')
@@ -473,6 +523,16 @@ function App() {
         onNavigateHome={() => navigate('/')}
         onNavigateCart={() => navigate('/carrinho')}
         onNavigatePayment={(id) => navigate(`/pagamento?id=${id}`)}
+        onNavigateEdit={(id) => {
+          setEditingTeamId(id)
+          const selectedTeam = times.find((time) => time.id === id)
+          if (selectedTeam) {
+            setFormData({ ...initialForm, ...selectedTeam })
+          }
+          setErrors([])
+          setErroServidor('')
+          navigate('/')
+        }}
         onNavigateLogin={() => navigate('/acesso')}
         userDisplayName={displayName}
       />
@@ -546,6 +606,13 @@ function App() {
         setErrors([])
         setErroServidor('')
       }}
+      onCancelEdit={() => {
+        setEditingTeamId('')
+        setFormData(initialForm)
+        setErrors([])
+        setErroServidor('')
+      }}
+      isEditing={Boolean(editingTeamId)}
       times={times}
       userDisplayName={displayName}
     />

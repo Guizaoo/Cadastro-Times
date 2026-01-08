@@ -70,10 +70,11 @@ export const formatCelular = (celular) => {
 export const normalizeText = (value) =>
   value?.trim?.().replace(/\s+/g, ' ') ?? value
 
-export const cpfExists = (times, cpfDigits, modalidade) => {
+export const cpfExists = (times, cpfDigits, modalidade, excludeId = '') => {
   if (!cpfDigits) return false
 
   return times.some((time) => {
+    if (excludeId && time.id === excludeId) return false
     if (modalidade && time.modalidade !== modalidade) return false
     return sanitizeDigits(time.cpf || '') === cpfDigits
   })

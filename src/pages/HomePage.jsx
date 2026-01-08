@@ -14,6 +14,8 @@ export function HomePage({
   onNavigateCart,
   onNavigatePayment,
   onResetForm,
+  onCancelEdit,
+  isEditing,
   userDisplayName,
 }) {
   return (
@@ -45,6 +47,18 @@ export function HomePage({
               CPF e celular) para que cada clube se sinta convidado desde o
               primeiro clique.
             </p>
+            {isEditing && (
+              <div className="mt-3 inline-flex items-center gap-2 rounded-full border border-amber-400/40 bg-amber-500/10 px-4 py-2 text-xs font-semibold text-amber-100">
+                Você está no modo edição.
+                <button
+                  type="button"
+                  onClick={onCancelEdit}
+                  className="rounded-full border border-amber-300/60 px-3 py-1 text-[11px] font-semibold text-amber-100 transition hover:bg-amber-400/20"
+                >
+                  Cancelar edição
+                </button>
+              </div>
+            )}
           </div>
         </header>
 
@@ -216,8 +230,17 @@ export function HomePage({
                   type="submit"
                   className="inline-flex items-center gap-2 rounded-lg bg-amber-400 px-5 py-2 text-sm font-semibold text-slate-950 transition .hover:translate-y-[1px] hover:bg-amber-300 focus:outline-none focus:ring-2 focus:ring-amber-300/70"
                 >
-                  Salvar cadastro
+                  {isEditing ? "Salvar alterações" : "Salvar cadastro"}
                 </button>
+                {isEditing && (
+                  <button
+                    type="button"
+                    onClick={onCancelEdit}
+                    className="inline-flex items-center gap-2 rounded-lg border border-amber-400/60 px-5 py-2 text-sm font-semibold text-amber-100 transition hover:bg-amber-400/10"
+                  >
+                    Cancelar edição
+                  </button>
+                )}
                 <button
                   type="button"
                   onClick={onResetForm}

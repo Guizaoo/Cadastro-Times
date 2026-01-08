@@ -84,7 +84,7 @@ export async function saveTeam(team) {
   return team
 }
 
-export async function cpfAlreadyUsed(cpf, cpfDigits = '', modalidade = '') {
+export async function cpfAlreadyUsed(cpf, cpfDigits = '', modalidade = '', excludeId = '') {
   if (!supabase) {
     throw new Error(supabaseConfigError)
   }
@@ -94,7 +94,10 @@ export async function cpfAlreadyUsed(cpf, cpfDigits = '', modalidade = '') {
   const protectedCpf = cpfValue ? await buildProtectedCpf(cpfValue) : ''
 
   if (protectedCpf) {
-    const baseQuery = supabase.from('inscricoes').select('id').eq('cpf', protectedCpf)
+    let baseQuery = supabase.from('inscricoes').select('id').eq('cpf', protectedCpf)
+    if (excludeId) {
+      baseQuery = baseQuery.neq('id', excludeId)
+    }
     const { data, error } = await (modalidade
       ? baseQuery.eq('modalidade', modalidade)
       : baseQuery
@@ -113,7 +116,10 @@ export async function cpfAlreadyUsed(cpf, cpfDigits = '', modalidade = '') {
     return false
   }
 
-  const baseQuery = supabase.from('inscricoes').select('id').eq('cpf', normalizedDigits)
+  let baseQuery = supabase.from('inscricoes').select('id').eq('cpf', normalizedDigits)
+  if (excludeId) {
+    baseQuery = baseQuery.neq('id', excludeId)
+  }
   const { data, error } = await (modalidade
     ? baseQuery.eq('modalidade', modalidade)
     : baseQuery
@@ -124,6 +130,25 @@ export async function cpfAlreadyUsed(cpf, cpfDigits = '', modalidade = '') {
   }
 
   return Boolean(data?.id)
+}
+
+export async function updateTeam(team) {
+  if (!supabase) {
+    throw new Error(supabaseConfigError)
+  }
+
+  const { data, error } = await supabase
+    .from('inscricoes')
+    .update(toSupabaseTeam(team))
+    .eq('id', team.id)
+    .select('*')
+    .single()
+
+  if (error) {
+    throw error
+  }
+
+  return data ? fromSupabaseTeam(data) : team
 }
 
 export async function removeTeam(id) {
