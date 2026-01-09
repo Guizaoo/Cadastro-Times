@@ -12,13 +12,127 @@ const formatCreatedAt = (dateString) =>
   })
 
 export function AdminPage({ times, carregando, erroServidor, onDelete, onStatusChange, onNavigateHome, userDisplayName }) {
-  const { pagos, reprovados, pendentes } = useMemo(
+  const { pagos, reprovados, pendentes, timesPorModalidade } = useMemo(
     () => ({
       pagos: times.filter((time) => time.status === 'pago').length,
       reprovados: times.filter((time) => time.status === 'reprovado').length,
       pendentes: times.filter((time) => time.status === 'pendente').length,
+      timesPorModalidade: {
+        volei: times.filter((time) => time.modalidade === 'volei'),
+        futebol: times.filter((time) => time.modalidade === 'futebol'),
+        outros: times.filter((time) => !['volei', 'futebol'].includes(time.modalidade)),
+      },
     }),
     [times]
+  )
+
+  const renderTabelaTimes = (listaTimes) => (
+    <div className="-mx-4 overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/40 shadow-inner shadow-black/30 sm:mx-0">
+      <table className=".min-w-[720px] w-full text-sm text-slate-200">
+        <thead className="bg-slate-900/80 text-xs uppercase tracking-wide text-slate-400">
+          <tr>
+            <th className="px-4 py-3 text-left">Equipe</th>
+            <th className="px-4 py-3 text-left">Modalidade</th>
+            <th className="px-4 py-3 text-left">Integrantes</th>
+            <th className="px-4 py-3 text-left">Instagram</th>
+            <th className="px-4 py-3 text-left">Contato</th>
+            <th className="px-4 py-3 text-left">Status</th>
+            <th className="px-4 py-3 text-left">Criado em</th>
+            <th className="px-4 py-3 text-left">Ações</th>
+          </tr>
+        </thead>
+        <tbody>
+          {listaTimes.map((time) => {
+            const integrantesList = parseIntegrantesList(time.integrantes).filter(Boolean)
+            const instagramList = parseIntegrantesList(time.instagram).filter(Boolean)
+            const rowCount = Math.max(integrantesList.length, instagramList.length)
+            const displayRows =
+              rowCount > 0
+                ? Array.from({ length: rowCount }, (_, index) => ({
+                  integrante: integrantesList[index],
+                  instagram: instagramList[index],
+                }))
+                : [{ integrante: null, instagram: null }]
+
+            return (
+              <tr key={time.id} className="border-t border-slate-800/80">
+                <td className="px-4 py-3">
+                  <div className="font-semibold text-slate-50">{time.nomeEquipe}</div>
+                  <div className="text-xs text-slate-400">CPF {formatCpfForDisplay(time.cpf)}</div>
+                </td>
+                <td className="px-4 py-3 capitalize">
+                  {time.modalidade}
+                  {time.modalidade === 'volei' && ` • ${time.categoriaVolei}`}
+                </td>
+                <td className="px-4 py-3 text-xs text-slate-300">
+                  <div className="space-y-1">
+                    {displayRows.map((row, index) => (
+                      <div key={`${time.id}-integrante-${index}`} className="truncate">
+                        {row.integrante ? (
+                          row.integrante
+                        ) : (
+                          <span className="text-slate-500">-</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </td>
+                <td className="px-4 py-3 text-xs text-slate-300">
+                  <div className="space-y-1">
+                    {displayRows.map((row, index) => (
+                      <div key={`${time.id}-instagram-${index}`} className="truncate">
+                        {row.instagram ? (
+                          row.instagram
+                        ) : (
+                          <span className="text-slate-500">-</span>
+                        )}
+                      </div>
+                    ))}
+                  </div>
+                </td>
+                <td className="px-4 py-3 text-xs text-slate-300">{time.celular}</td>
+                <td className="px-4 py-3 text-xs">
+                  <StatusBadge status={time.status} />
+                </td>
+                <td className="px-4 py-3 text-xs text-slate-300">{formatCreatedAt(time.criadoEm)}</td>
+                <td className="px-4 py-3">
+                  <div className="flex flex-wrap gap-2 text-xs">
+                    <button
+                      type="button"
+                      onClick={() => onStatusChange(time.id, 'pago')}
+                      className="rounded-lg border border-emerald-500/50 px-3 py-2 font-semibold text-emerald-100 transition hover:bg-emerald-500/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
+                    >
+                      Pago
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onStatusChange(time.id, 'reprovado')}
+                      className="rounded-lg border border-amber-500/50 px-3 py-2 font-semibold text-amber-100 transition hover:bg-amber-500/10 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
+                    >
+                      Reprovar
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onStatusChange(time.id, 'pendente')}
+                      className="rounded-lg border border-slate-600 px-3 py-2 font-semibold text-slate-100 transition hover:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-slate-600/40"
+                    >
+                      Pendente
+                    </button>
+                    <button
+                      type="button"
+                      onClick={() => onDelete(time.id)}
+                      className="rounded-lg border border-red-500/40 px-3 py-2 font-semibold text-red-100 transition hover:bg-red-500/10 focus:outline-none focus:ring-2 focus:ring-red-500/40"
+                    >
+                      Excluir
+                    </button>
+                  </div>
+                </td>
+              </tr>
+            )
+          })}
+        </tbody>
+      </table>
+    </div>
   )
 
   return (
@@ -76,111 +190,51 @@ export function AdminPage({ times, carregando, erroServidor, onDelete, onStatusC
               </button>
             </div>
 
-            <div className="-mx-4 overflow-x-auto rounded-xl border border-slate-800 bg-slate-950/40 shadow-inner shadow-black/30 sm:mx-0">
-              <table className=".min-w-[720px] w-full text-sm text-slate-200">
-                <thead className="bg-slate-900/80 text-xs uppercase tracking-wide text-slate-400">
-                  <tr>
-                    <th className="px-4 py-3 text-left">Equipe</th>
-                    <th className="px-4 py-3 text-left">Modalidade</th>
-                    <th className="px-4 py-3 text-left">Integrantes</th>
-                    <th className="px-4 py-3 text-left">Instagram</th>
-                    <th className="px-4 py-3 text-left">Contato</th>
-                    <th className="px-4 py-3 text-left">Status</th>
-                    <th className="px-4 py-3 text-left">Criado em</th>
-                    <th className="px-4 py-3 text-left">Ações</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {times.map((time) => {
-                    const integrantesList = parseIntegrantesList(time.integrantes).filter(Boolean)
-                    const instagramList = parseIntegrantesList(time.instagram).filter(Boolean)
-                    const rowCount = Math.max(integrantesList.length, instagramList.length)
-                    const displayRows =
-                      rowCount > 0
-                        ? Array.from({ length: rowCount }, (_, index) => ({
-                          integrante: integrantesList[index],
-                          instagram: instagramList[index],
-                        }))
-                        : [{ integrante: null, instagram: null }]
+            <div className="space-y-6">
+              {timesPorModalidade.volei.length > 0 && (
+                <div className="space-y-3">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.25em] text-amber-200">Vôlei</p>
+                      <h3 className="text-lg font-semibold text-slate-50">Times de vôlei</h3>
+                    </div>
+                    <span className="rounded-full border border-amber-400/50 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-100">
+                      {timesPorModalidade.volei.length} times
+                    </span>
+                  </div>
+                  {renderTabelaTimes(timesPorModalidade.volei)}
+                </div>
+              )}
 
-                    return (
-                    <tr key={time.id} className="border-t border-slate-800/80">
-                      <td className="px-4 py-3">
-                        <div className="font-semibold text-slate-50">{time.nomeEquipe}</div>
-                        <div className="text-xs text-slate-400">CPF {formatCpfForDisplay(time.cpf)}</div>
-                      </td>
-                      <td className="px-4 py-3 capitalize">
-                        {time.modalidade}
-                        {time.modalidade === 'volei' && ` • ${time.categoriaVolei}`}
-                      </td>
-                      <td className="px-4 py-3 text-xs text-slate-300">
-                        <div className="space-y-1">
-                          {displayRows.map((row, index) => (
-                            <div key={`${time.id}-integrante-${index}`} className="truncate">
-                              {row.integrante ? (
-                                row.integrante
-                              ) : (
-                                <span className="text-slate-500">-</span>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-xs text-slate-300">
-                        <div className="space-y-1">
-                          {displayRows.map((row, index) => (
-                            <div key={`${time.id}-instagram-${index}`} className="truncate">
-                              {row.instagram ? (
-                                row.instagram
-                              ) : (
-                                <span className="text-slate-500">-</span>
-                              )}
-                            </div>
-                          ))}
-                        </div>
-                      </td>
-                      <td className="px-4 py-3 text-xs text-slate-300">{time.celular}</td>
-                      <td className="px-4 py-3 text-xs">
-                        <StatusBadge status={time.status} />
-                      </td>
-                      <td className="px-4 py-3 text-xs text-slate-300">{formatCreatedAt(time.criadoEm)}</td>
-                      <td className="px-4 py-3">
-                        <div className="flex flex-wrap gap-2 text-xs">
-                          <button
-                            type="button"
-                            onClick={() => onStatusChange(time.id, 'pago')}
-                            className="rounded-lg border border-emerald-500/50 px-3 py-2 font-semibold text-emerald-100 transition hover:bg-emerald-500/10 focus:outline-none focus:ring-2 focus:ring-emerald-500/40"
-                          >
-                            Pago
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => onStatusChange(time.id, 'reprovado')}
-                            className="rounded-lg border border-amber-500/50 px-3 py-2 font-semibold text-amber-100 transition hover:bg-amber-500/10 focus:outline-none focus:ring-2 focus:ring-amber-500/40"
-                          >
-                            Reprovar
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => onStatusChange(time.id, 'pendente')}
-                            className="rounded-lg border border-slate-600 px-3 py-2 font-semibold text-slate-100 transition hover:bg-slate-800/60 focus:outline-none focus:ring-2 focus:ring-slate-600/40"
-                          >
-                            Pendente
-                          </button>
-                          <button
-                            type="button"
-                            onClick={() => onDelete(time.id)}
-                            className="rounded-lg border border-red-500/40 px-3 py-2 font-semibold text-red-100 transition hover:bg-red-500/10 focus:outline-none focus:ring-2 focus:ring-red-500/40"
-                          >
-                            Excluir
-                          </button>
-                        </div>
-                      </td>
-                    </tr>
-                    )
-                  })}
-                </tbody>
-              </table>
+              {timesPorModalidade.futebol.length > 0 && (
+                <div className="space-y-3 border-t border-dashed border-slate-700/80 pt-6">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.25em] text-amber-200">Futebol</p>
+                      <h3 className="text-lg font-semibold text-slate-50">Times de futebol</h3>
+                    </div>
+                    <span className="rounded-full border border-amber-400/50 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-100">
+                      {timesPorModalidade.futebol.length} times
+                    </span>
+                  </div>
+                  {renderTabelaTimes(timesPorModalidade.futebol)}
+                </div>
+              )}
+
+              {timesPorModalidade.outros.length > 0 && (
+                <div className="space-y-3 border-t border-dashed border-slate-700/80 pt-6">
+                  <div className="flex flex-wrap items-center justify-between gap-2">
+                    <div>
+                      <p className="text-xs uppercase tracking-[0.25em] text-amber-200">Outras modalidades</p>
+                      <h3 className="text-lg font-semibold text-slate-50">Times adicionais</h3>
+                    </div>
+                    <span className="rounded-full border border-amber-400/50 bg-amber-500/10 px-3 py-1 text-xs font-semibold text-amber-100">
+                      {timesPorModalidade.outros.length} times
+                    </span>
+                  </div>
+                  {renderTabelaTimes(timesPorModalidade.outros)}
+                </div>
+              )}
             </div>
           </section>
         )}
