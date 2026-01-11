@@ -10,6 +10,8 @@ const sportOptions = {
   },
 }
 
+const nivelVoleiOptions = ['Iniciante', 'Intermediário']
+
 const initialForm = {
   modalidade: 'futebol',
   nome: '',
@@ -19,6 +21,8 @@ const initialForm = {
   instagram: '',
   integrantes: '',
   categoriaVolei: '',
+  nivelIntegrante1: '',
+  nivelIntegrante2: '',
 }
 
-export { initialForm, sportOptions }
+export { initialForm, nivelVoleiOptions, sportOptions }

@@ -1,7 +1,7 @@
 import React from "react";
 import { InputField, NavigationBar } from "../components/ui";
 
-import { sportOptions } from "./homePageConfig";
+import { nivelVoleiOptions, sportOptions } from "./homePageConfig";
 
 export function HomePage({
   formData,
@@ -98,7 +98,11 @@ export function HomePage({
                           modalidade: key,
                           categoriaVolei:
                             key === "volei" ? current.categoriaVolei : "",
-                            instagram: key === "volei" ? current.instagram : "",
+                          instagram: key === "volei" ? current.instagram : "",
+                          nivelIntegrante1:
+                            key === "volei" ? current.nivelIntegrante1 : "",
+                          nivelIntegrante2:
+                            key === "volei" ? current.nivelIntegrante2 : "",
                         }))
                       }
                       className={`rounded-xl border px-4 py-3 text-left transition focus:outline-none focus:ring-2 focus:ring-amber-400/70 ${
@@ -191,6 +195,68 @@ export function HomePage({
                     : "Limite de 18 pessoas: separe os nomes por vírgula ou quebra de linha."}
                 </p>
               </div>
+
+              {formData.modalidade === "volei" && (
+                <div className="flex flex-col gap-2">
+                  <p className="text-sm font-semibold text-slate-200">
+                    Nível de cada integrante*
+                  </p>
+                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                    <div className="flex flex-col gap-2">
+                      <label
+                        className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-200"
+                        htmlFor="nivelIntegrante1"
+                      >
+                        Integrante 1
+                      </label>
+                      <select
+                        id="nivelIntegrante1"
+                        name="nivelIntegrante1"
+                        value={formData.nivelIntegrante1}
+                        onChange={handleChange}
+                        className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-500/40"
+                      >
+                        <option value="" disabled>
+                          Selecione o nível
+                        </option>
+                        {nivelVoleiOptions.map((nivel) => (
+                          <option key={nivel} value={nivel}>
+                            {nivel}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                    <div className="flex flex-col gap-2">
+                      <label
+                        className="text-xs font-semibold uppercase tracking-[0.2em] text-amber-200"
+                        htmlFor="nivelIntegrante2"
+                      >
+                        Integrante 2
+                      </label>
+                      <select
+                        id="nivelIntegrante2"
+                        name="nivelIntegrante2"
+                        value={formData.nivelIntegrante2}
+                        onChange={handleChange}
+                        className="w-full rounded-lg border border-slate-700 bg-slate-900 px-3 py-2 text-sm outline-none transition focus:border-amber-400 focus:ring-2 focus:ring-amber-500/40"
+                      >
+                        <option value="" disabled>
+                          Selecione o nível
+                        </option>
+                        {nivelVoleiOptions.map((nivel) => (
+                          <option key={nivel} value={nivel}>
+                            {nivel}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+                  <p className="text-xs text-slate-400">
+                    Use a mesma ordem dos nomes informados acima (ex.: Pedro
+                    primeiro, Guizão segundo).
+                  </p>
+                </div>
+              )}
 
               {formData.modalidade === "volei" && (
                 <div className="flex flex-col gap-2">

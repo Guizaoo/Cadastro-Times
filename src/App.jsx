@@ -309,6 +309,7 @@ function App() {
     const instagramHandle =
       instagramRaw && !instagramRaw.startsWith('@') ? `@${instagramRaw}` : instagramRaw
     const requiresInstagram = formData.modalidade === 'volei'
+    const requiresVoleiLevels = formData.modalidade === 'volei'
 
     // Validações básicas
     const validationErrors = [
@@ -322,6 +323,12 @@ function App() {
       ...(!formData.integrantes?.trim() ? ['Integrantes é obrigatório'] : []),
       ...(formData.modalidade === 'volei' && !formData.categoriaVolei?.trim()
         ? ['Categoria do vôlei é obrigatória']
+        : []),
+      ...(requiresVoleiLevels && !formData.nivelIntegrante1?.trim()
+        ? ['Nível do integrante 1 é obrigatório']
+        : []),
+      ...(requiresVoleiLevels && !formData.nivelIntegrante2?.trim()
+        ? ['Nível do integrante 2 é obrigatório']
         : []),
 
       ...(!validateCPF(formData.cpf) ? ['CPF inválido'] : []),
@@ -385,6 +392,8 @@ function App() {
       instagram: requiresInstagram ? instagramHandle : '',
       integrantes: integrantesList.join(', '),
       categoriaVolei: normalizeText(formData.categoriaVolei || ''),
+      nivelIntegrante1: requiresVoleiLevels ? formData.nivelIntegrante1 : '',
+      nivelIntegrante2: requiresVoleiLevels ? formData.nivelIntegrante2 : '',
       status: baseTeam?.status ?? 'pendente',
       id: baseTeam?.id ?? crypto.randomUUID(),
       criadoEm: baseTeam?.criadoEm ?? new Date().toISOString(),

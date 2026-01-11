@@ -45,14 +45,23 @@ export function AdminPage({ times, carregando, erroServidor, onDelete, onStatusC
           {listaTimes.map((time) => {
             const integrantesList = parseIntegrantesList(time.integrantes).filter(Boolean)
             const instagramList = parseIntegrantesList(time.instagram).filter(Boolean)
-            const rowCount = Math.max(integrantesList.length, instagramList.length)
+            const niveisList =
+              time.modalidade === 'volei'
+                ? [time.nivelIntegrante1, time.nivelIntegrante2].filter(Boolean)
+                : []
+            const rowCount = Math.max(
+              integrantesList.length,
+              instagramList.length,
+              niveisList.length
+            )
             const displayRows =
               rowCount > 0
                 ? Array.from({ length: rowCount }, (_, index) => ({
-                  integrante: integrantesList[index],
-                  instagram: instagramList[index],
-                }))
-                : [{ integrante: null, instagram: null }]
+                    integrante: integrantesList[index],
+                    instagram: instagramList[index],
+                    nivel: niveisList[index],
+                  }))
+                : [{ integrante: null, instagram: null, nivel: null }]
 
             return (
               <tr key={time.id} className="border-t border-slate-800/80">
@@ -82,7 +91,14 @@ export function AdminPage({ times, carregando, erroServidor, onDelete, onStatusC
                     {displayRows.map((row, index) => (
                       <div key={`${time.id}-instagram-${index}`} className="truncate">
                         {row.instagram ? (
-                          row.instagram
+                          <span className="flex flex-wrap gap-2">
+                            <span>{row.instagram}</span>
+                            {row.nivel && (
+                              <span className="rounded-full border border-amber-400/40 bg-amber-500/10 px-2 py-0.5 text-[10px] font-semibold uppercase tracking-[0.2em] text-amber-100">
+                                {row.nivel}
+                              </span>
+                            )}
+                          </span>
                         ) : (
                           <span className="text-slate-500">-</span>
                         )}
